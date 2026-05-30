@@ -89,39 +89,7 @@
             <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
             <p class="subview-help" id="guest-subview-help"></p>
           </div>
-          <div class="headline-grid headline-grid--header" id="guest-headline-grid">
-            <article class="headline-module">
-              <div class="panel-head panel-head--tight">
-                <h3>Overall rating distribution</h3>
-                <p id="guest-overall-summary"></p>
-              </div>
-              <div class="headline-body" id="guest-overall-headline"></div>
-            </article>
-
-            <article class="headline-module">
-              <div class="panel-head panel-head--tight">
-                <h3>Return intent for 2027</h3>
-                <p id="guest-return-summary"></p>
-              </div>
-              <div class="headline-body" id="guest-return-headline"></div>
-            </article>
-
-            <article class="headline-module">
-              <div class="panel-head panel-head--tight">
-                <h3>Theme mix</h3>
-                <p>How the active slice talks.</p>
-              </div>
-              <div class="headline-body" id="guest-theme-headline"></div>
-            </article>
-
-            <article class="headline-module">
-              <div class="panel-head panel-head--tight">
-                <h3>Commerce overlap</h3>
-                <p>Missed sales cross-read against browse appetite.</p>
-              </div>
-              <div class="headline-body" id="guest-commerce-headline"></div>
-            </article>
-          </div>
+          <div class="insights-strip" id="guest-insights" aria-label="Guest slice insights"></div>
         </section>
 
         <section class="subview-panel" data-panel-group="guest" data-subview-panel="overview">
@@ -1415,116 +1383,58 @@
         const returnDefinite = guest.filter(
           (entry) => entry.return_intent === "Definitely - already planning it",
         ).length;
-
         const guestThemes = themeCountsFrom(guest, detectGuestThemes);
-        const ratingOrder = [2, 3, 4, 5];
-        const overallCounts = countBy(guest, (entry) => entry.overall_rating, ratingOrder);
-        document.getElementById("guest-overall-headline").innerHTML = `
-          <div class="dist-list">
-            ${buildMeterRows(
-              ratingOrder
-                .slice()
-                .reverse()
-                .map((value) => {
-                  const count = overallCounts.get(value) || 0;
-                  return {
-                    label: `${value}★`,
-                    value: guest.length ? `${fmtPercent((count / guest.length) * 100, 0)} · ${count}` : "0",
-                    share: guest.length ? (count / guest.length) * 100 : 0,
-                  };
-                }),
-              "meter-fill--teal",
-            )}
-          </div>
-        `;
-        document.getElementById("guest-overall-summary").textContent =
-          `${guest.filter((entry) => entry.overall_rating === 5).length} guests gave Bazique a full 5 stars.`;
+        const fiveStarCount = guest.filter((entry) => entry.overall_rating === 5).length;
+        const atRisk = guest.filter((entry) => ["Not sure", "Unlikely"].includes(entry.return_intent));
+        const likely = guest.filter((entry) =>
+          ["Definitely - already planning it", "Very likely"].includes(entry.return_intent),
+        );
+        const softReturn = guest.filter((entry) =>
+          ["Probably", "Not sure", "Unlikely"].includes(entry.return_intent),
+        );
+        const atRiskLayout = average(atRisk.map((entry) => entry.site_layout));
+        const atRiskMusic = average(atRisk.map((entry) => entry.music_rating));
+        const likelyLayout = average(likely.map((entry) => entry.site_layout));
+        const softMissed = softReturn.filter(
+          (entry) => entry.missed_purchase && entry.missed_purchase !== "No",
+        ).length;
+        const likelyMissed = likely.filter(
+          (entry) => entry.missed_purchase && entry.missed_purchase !== "No",
+        ).length;
+        const topTheme = guestThemes[0];
+        const vendorLocation = average(window.__dashboardData.vendor.map((entry) => entry.rating_location));
+        const vendorSupport = average(window.__dashboardData.vendor.map((entry) => entry.rating_support));
 
-        const guestReturnOrder = [
-          "Definitely - already planning it",
-          "Very likely",
-          "Probably",
-          "Not sure",
-          "Unlikely",
-        ];
-        const guestReturnCounts = countBy(guest, (entry) => entry.return_intent, guestReturnOrder);
-        document.getElementById("guest-return-headline").innerHTML = `
-          <div class="intent-bar">
-            ${guestReturnOrder
-              .map((label) => {
-                const count = guestReturnCounts.get(label) || 0;
-                const share = guest.length ? (count / guest.length) * 100 : 0;
-                return `<span class="intent-segment" style="width:${share}%; background:${categoryColors.guestReturn[label]}"></span>`;
-              })
-              .join("")}
-          </div>
-          <div class="intent-list">
-            ${buildMeterRows(
-              guestReturnOrder.map((label) => {
-                const count = guestReturnCounts.get(label) || 0;
-                return {
-                  rowClass: "intent-row",
-                  labelClass: "intent-label",
-                  valueClass: "intent-value",
-                  label: label.replace("Definitely - already planning it", "Definitely").replace("Very likely", "Very likely"),
-                  value: guest.length ? `${fmtPercent((count / guest.length) * 100, 0)} · ${count}` : "0",
-                  share: guest.length ? (count / guest.length) * 100 : 0,
-                };
-              }),
-              "meter-fill--amber",
-            )}
-          </div>
-        `;
-        document.getElementById("guest-return-summary").textContent =
-          `${guestReturnCounts.get("Definitely - already planning it") || 0} guests are already planning to return.`;
-
-        document.getElementById("guest-theme-headline").innerHTML = `
-          <div class="theme-list">
-            ${buildMeterRows(
-              guestThemes.slice(0, 5).map(([label, count]) => ({
-                rowClass: "theme-row",
-                labelClass: "theme-label",
-                valueClass: "theme-value",
-                label,
-                value: guest.length ? `${fmtPercent((count / guest.length) * 100, 0)} · ${count}` : `${count}`,
-                share: guest.length ? (count / guest.length) * 100 : 0,
-              })),
-              "meter-fill--blue",
-            )}
-          </div>
-        `;
-
-        const commerceBands = [
-          { key: "No", label: "No missed purchase" },
-          { key: "Yes, once", label: "Missed once" },
-          { key: "Yes, more than once", label: "Missed >1" },
-        ];
-        document.getElementById("guest-commerce-headline").innerHTML = `
-          <div class="commerce-columns">
-            ${commerceBands
-              .map((band) => {
-                const inBand = guest.filter((entry) => entry.missed_purchase === band.key);
-                const definite = inBand.filter((entry) => entry.prebrowse_interest === "Yes - I'd definitely use that").length;
-                const probable = inBand.filter((entry) => entry.prebrowse_interest === "Probably - sounds handy").length;
-                const positive = definite + probable;
-                const positiveShare = inBand.length ? (positive / inBand.length) * 100 : 0;
-                return `
-                  <div class="commerce-column">
-                    <strong>${band.label}</strong>
-                    <div class="commerce-stat">
-                      <span class="commerce-stat-label">Slice count</span>
-                      <span class="commerce-stat-value">${inBand.length}</span>
-                    </div>
-                    <div class="commerce-stat">
-                      <span class="commerce-stat-label">Pre-browse positive</span>
-                      <span class="commerce-stat-value">${fmtPercent(positiveShare, 0)}</span>
-                    </div>
-                    <span class="meter-track"><span class="meter-fill meter-fill--teal" style="width:${positiveShare}%"></span></span>
-                  </div>
-                `;
-              })
-              .join("")}
-          </div>
+        document.getElementById("guest-insights").innerHTML = `
+          <article class="insight-card">
+            <span class="insight-kicker">Top-line</span>
+            <strong>${fiveStarCount} guests gave Bazique a full 5 stars.</strong>
+            <p>${guest.length ? fmtPercent((fiveStarCount / guest.length) * 100, 0) : "0%"} of the current slice rated the festival at the top mark.</p>
+          </article>
+          <article class="insight-card">
+            <span class="insight-kicker">At-risk returners</span>
+            <strong>${atRisk.length} guests are unsure or unlikely to return.</strong>
+            <p>They rate layout at ${fmtNumber(atRiskLayout, 2)} / 5 versus ${fmtNumber(likelyLayout, 2)} among likely returners.</p>
+          </article>
+          <article class="insight-card">
+            <span class="insight-kicker">Programme vs environment</span>
+            <strong>Music holds up better than the environment for softer-return guests.</strong>
+            <p>At-risk guests still rate music ${fmtNumber(atRiskMusic, 2)} / 5, suggesting the drag is operational rather than artistic.</p>
+          </article>
+          <article class="insight-card">
+            <span class="insight-kicker">Guest ↔ vendor overlap</span>
+            <strong>${softReturn.length ? fmtPercent((softMissed / softReturn.length) * 100, 0) : "0%"} of softer-return guests missed a purchase.</strong>
+            <p>Likely returners sit at ${likely.length ? fmtPercent((likelyMissed / likely.length) * 100, 0) : "0%"}. Vendors also score location just ${fmtNumber(vendorLocation, 2)} / 5 while support stays strong at ${fmtNumber(vendorSupport, 2)}.</p>
+          </article>
+          ${
+            topTheme
+              ? `<article class="insight-card">
+            <span class="insight-kicker">Dominant theme</span>
+            <strong>${topTheme[0]} leads the narrative in this slice.</strong>
+            <p>${guest.length ? fmtPercent((topTheme[1] / guest.length) * 100, 0) : "0%"} of the active guest slice mentions it across open-text responses.</p>
+          </article>`
+              : ""
+          }
         `;
 
         const facilityMap = [
