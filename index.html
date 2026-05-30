@@ -90,8 +90,10 @@
             </div>
           </div>
           <div class="control-grid" id="guest-controls"></div>
+          <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
         </section>
 
+        <section class="subview-panel" data-panel-group="guest" data-subview-panel="overview">
         <section class="workbench-grid">
           <article class="compact-panel compact-panel--metrics">
             <div class="panel-head">
@@ -197,13 +199,13 @@
             <canvas id="guest-improvements-chart" aria-label="Guest improvement ideas for 2027"></canvas>
           </div>
         </article>
+        </section>
 
-        <section class="section-block">
+        <section class="section-block subview-panel" data-panel-group="guest" data-subview-panel="narrative" hidden>
           <div class="section-head">
             <h3>Quote explorer</h3>
             <p>
-              Filter the guest open-text responses by topic. Names and IDs are not
-              shown here.
+              Dense narrative browser with question grouping and semantic tags.
             </p>
           </div>
 
@@ -212,11 +214,11 @@
             <p class="microcopy" id="guest-quote-count"></p>
           </div>
 
-          <div class="quotes-grid" id="guest-quotes"></div>
+          <div class="quotes-grid quotes-grid--dense" id="guest-quotes"></div>
           <button class="show-more" id="guest-show-more" type="button">Show more guest quotes</button>
         </section>
 
-        <section class="subsection-card">
+        <section class="subsection-card subview-panel" data-panel-group="guest" data-subview-panel="marketplace" hidden>
           <div class="subsection-head">
             <p class="eyebrow">Marketplace intelligence</p>
             <h3>Planning signals outside the core festival ratings</h3>
@@ -276,8 +278,10 @@
             <strong id="vendor-slice-summary">All vendor responses</strong>
           </div>
           <div class="control-grid" id="vendor-controls"></div>
+          <div class="subview-tabs" id="vendor-subviews" aria-label="Vendor subviews"></div>
         </section>
 
+        <section class="subview-panel" data-panel-group="vendor" data-subview-panel="overview">
         <section class="workbench-grid">
           <article class="compact-panel compact-panel--metrics">
             <div class="panel-head">
@@ -349,13 +353,13 @@
             <canvas id="vendor-improvements-chart" aria-label="Vendor improvement requests for 2027"></canvas>
           </div>
         </article>
+        </section>
 
-        <section class="section-block">
+        <section class="section-block subview-panel" data-panel-group="vendor" data-subview-panel="narrative" hidden>
           <div class="section-head">
             <h3>Vendor response explorer</h3>
             <p>
-              Explore written responses by topic and filter between food and non-food
-              traders.
+              Dense vendor narrative browser with semantic tags.
             </p>
           </div>
 
@@ -365,11 +369,11 @@
             <p class="microcopy" id="vendor-response-count"></p>
           </div>
 
-          <div class="quotes-grid" id="vendor-responses"></div>
+          <div class="quotes-grid quotes-grid--dense" id="vendor-responses"></div>
           <button class="show-more" id="vendor-show-more" type="button">Show more vendor responses</button>
         </section>
 
-        <section class="subsection-card">
+        <section class="subsection-card subview-panel" data-panel-group="vendor" data-subview-panel="marketplace" hidden>
           <div class="subsection-head">
             <p class="eyebrow">Marketplace intelligence</p>
             <h3>Who wants an online marketplace, and on what terms?</h3>
@@ -400,7 +404,7 @@
             </article>
           </div>
 
-          <div class="quotes-grid" id="vendor-marketplace-cards"></div>
+          <div class="quotes-grid quotes-grid--dense" id="vendor-marketplace-cards"></div>
           <button class="show-more" id="vendor-marketplace-show-more" type="button">
             Show more marketplace comments
           </button>
@@ -525,6 +529,8 @@
 
       const state = {
         activeTab: "guest",
+        guestSubview: "overview",
+        vendorSubview: "overview",
         guestRatingFilter: "all",
         guestReturnFilter: "all",
         guestCommerceFilter: "all",
@@ -902,6 +908,26 @@
         });
       }
 
+      function renderSubviewTabs(targetId, items, activeId, onClick) {
+        const target = document.getElementById(targetId);
+        target.innerHTML = "";
+        items.forEach((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "filter-chip";
+          button.textContent = item.label;
+          button.setAttribute("aria-pressed", String(item.id === activeId));
+          button.addEventListener("click", () => onClick(item.id));
+          target.appendChild(button);
+        });
+      }
+
+      function renderSubviewPanels(group, activeId) {
+        document.querySelectorAll(`[data-panel-group="${group}"]`).forEach((panel) => {
+          panel.hidden = panel.dataset.subviewPanel !== activeId;
+        });
+      }
+
       function getGuestQuotes(guest) {
         const active = guestQuoteConfig.find((item) => item.id === state.guestQuoteFilter);
         if (active.id === "all") {
@@ -1087,6 +1113,21 @@
       }
 
       function renderGuestSection(guest, guestRaw) {
+        renderSubviewTabs(
+          "guest-subviews",
+          [
+            { id: "overview", label: "Overview" },
+            { id: "narrative", label: "Narrative" },
+            { id: "marketplace", label: "Marketplace" },
+          ],
+          state.guestSubview,
+          (id) => {
+            state.guestSubview = id;
+            renderDashboard();
+          },
+        );
+        renderSubviewPanels("guest", state.guestSubview);
+
         renderSelectControls("guest-controls", [
           {
             label: "Overall rating",
@@ -1462,6 +1503,21 @@
       }
 
       function renderVendorSection(vendor, vendorRaw) {
+        renderSubviewTabs(
+          "vendor-subviews",
+          [
+            { id: "overview", label: "Overview" },
+            { id: "narrative", label: "Narrative" },
+            { id: "marketplace", label: "Marketplace" },
+          ],
+          state.vendorSubview,
+          (id) => {
+            state.vendorSubview = id;
+            renderDashboard();
+          },
+        );
+        renderSubviewPanels("vendor", state.vendorSubview);
+
         renderSelectControls("vendor-controls", [
           {
             label: "Vendor type",
