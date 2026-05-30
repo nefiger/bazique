@@ -660,6 +660,7 @@
                 <span class="metric-label">${item.label}</span>
                 <span class="metric-value">${item.value}</span>
                 <span class="metric-note">${item.note}</span>
+                ${item.subnote ? `<span class="metric-subnote">${item.subnote}</span>` : ""}
               </article>
             `,
           )
@@ -1176,21 +1177,25 @@
             label: "Overall rating",
             value: `${fmtNumber(average(guest.map((entry) => entry.overall_rating)), 2)} / 5`,
             note: guest.length ? "Average in current slice" : "No responses in current slice",
+            subnote: `${guest.length} of ${guestRaw.length} guest responses`,
           },
           {
             label: "Returning in 2027",
             value: guest.length ? fmtPercent((returnDefinite / guest.length) * 100, 0) : "0%",
             note: "Definitely already planning it",
+            subnote: `${returnDefinite} of ${guest.length || 0} responses`,
           },
           {
             label: "Rated 4 or 5 stars",
             value: guest.length ? fmtPercent((rated45 / guest.length) * 100, 0) : "0%",
             note: `${rated45} of ${guest.length} responses`,
+            subnote: `${guestRaw.length ? fmtPercent((rated45 / guestRaw.length) * 100, 0) : "0%"} of full guest dataset`,
           },
           {
             label: "Music programme",
             value: `${fmtNumber(musicAvg, 2)} / 5`,
             note: "Average music rating",
+            subnote: `${guest.filter((entry) => typeof entry.music_rating === "number").length} responses with music score`,
           },
         ]);
 
@@ -1546,21 +1551,25 @@
             label: "Responses",
             value: `${vendor.length} of 31`,
             note: `${fmtPercent(responseRate, 0)} response rate`,
+            subnote: `${vendorRaw.length} total vendor records available`,
           },
           {
             label: "Comms rating",
             value: `${fmtNumber(commsAvg, 2)} / 5`,
             note: "Lead-up communication",
+            subnote: `${vendor.filter((entry) => typeof entry.rating_comms === "number").length} scored responses`,
           },
           {
             label: "Admin rating",
             value: `${fmtNumber(adminAvg, 2)} / 5`,
             note: "Onboarding and admin process",
+            subnote: `${vendor.filter((entry) => typeof entry.rating_admin === "number").length} scored responses`,
           },
           {
             label: "Location / foot traffic",
             value: `${fmtNumber(locationAvg, 2)} / 5`,
             note: "Weakest vendor score in the dataset",
+            subnote: `${vendor.filter((entry) => typeof entry.rating_location === "number").length} scored responses`,
           },
         ]);
 
