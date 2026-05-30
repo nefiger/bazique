@@ -89,9 +89,9 @@
             <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
             <p class="subview-help" id="guest-subview-help"></p>
           </div>
-          <div class="insights-bar" aria-label="Guest slice insights">
-            <span class="insights-label">Insights</span>
-            <div class="insights-strip" id="guest-insights"></div>
+          <div class="insights-note" aria-label="Guest slice insights">
+            <span class="insights-label">Observed in current slice</span>
+            <div class="insights-inline" id="guest-insights"></div>
           </div>
         </section>
 
@@ -1407,33 +1407,35 @@
         const topTheme = guestThemes[0];
         const vendorLocation = average(window.__dashboardData.vendor.map((entry) => entry.rating_location));
         const vendorSupport = average(window.__dashboardData.vendor.map((entry) => entry.rating_support));
+        const insights = [];
+        insights.push(
+          `${fiveStarCount} guests gave Bazique a full 5 stars (${guest.length ? fmtPercent((fiveStarCount / guest.length) * 100, 0) : "0%"} of this slice).`,
+        );
+        if (atRisk.length >= 3 && likely.length >= 3) {
+          insights.push(
+            `${atRisk.length} guests are unsure or unlikely to return; their layout score drops to ${fmtNumber(atRiskLayout, 2)} / 5 vs ${fmtNumber(likelyLayout, 2)} for likely returners.`,
+          );
+        }
+        if (atRisk.length >= 3 && typeof atRiskMusic === "number" && atRiskMusic > 0) {
+          insights.push(
+            `Among at-risk guests, music still scores ${fmtNumber(atRiskMusic, 2)} / 5, pointing to operational drag rather than programme weakness.`,
+          );
+        }
+        if (softReturn.length >= 4 && likely.length >= 4) {
+          insights.push(
+            `${softReturn.length ? fmtPercent((softMissed / softReturn.length) * 100, 0) : "0%"} of softer-return guests missed a purchase vs ${likely.length ? fmtPercent((likelyMissed / likely.length) * 100, 0) : "0%"} of likely returners; vendor location sits at ${fmtNumber(vendorLocation, 2)} / 5.`,
+          );
+        }
+        if (topTheme) {
+          insights.push(
+            `${topTheme[0]} leads the narrative in this slice, appearing in ${guest.length ? fmtPercent((topTheme[1] / guest.length) * 100, 0) : "0%"} of open-text responses.`,
+          );
+        }
 
-        document.getElementById("guest-insights").innerHTML = `
-          <article class="insight-card">
-            <strong>${fiveStarCount} guests gave Bazique a full 5 stars.</strong>
-            <span>${guest.length ? fmtPercent((fiveStarCount / guest.length) * 100, 0) : "0%"} of this slice.</span>
-          </article>
-          <article class="insight-card">
-            <strong>${atRisk.length} guests are unsure or unlikely to return.</strong>
-            <span>Layout falls to ${fmtNumber(atRiskLayout, 2)} / 5 vs ${fmtNumber(likelyLayout, 2)} for likely returners.</span>
-          </article>
-          <article class="insight-card">
-            <strong>Music holds up better than the environment for softer-return guests.</strong>
-            <span>At-risk guests still rate music ${fmtNumber(atRiskMusic, 2)} / 5.</span>
-          </article>
-          <article class="insight-card">
-            <strong>${softReturn.length ? fmtPercent((softMissed / softReturn.length) * 100, 0) : "0%"} of softer-return guests missed a purchase.</strong>
-            <span>Likely returners sit at ${likely.length ? fmtPercent((likelyMissed / likely.length) * 100, 0) : "0%"}; vendor location is ${fmtNumber(vendorLocation, 2)} / 5.</span>
-          </article>
-          ${
-            topTheme
-              ? `<article class="insight-card">
-            <strong>${topTheme[0]} leads the narrative in this slice.</strong>
-            <span>${guest.length ? fmtPercent((topTheme[1] / guest.length) * 100, 0) : "0%"} mention it in open text.</span>
-          </article>`
-              : ""
-          }
-        `;
+        document.getElementById("guest-insights").innerHTML = insights
+          .slice(0, 3)
+          .map((text) => `<span class="insight-inline-item">${escapeHtml(text)}</span>`)
+          .join("");
 
         const facilityMap = [
           ["Toilets availability", "facility_toilets_availability"],

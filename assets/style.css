@@ -354,7 +354,7 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   border-top: 1px solid rgba(24, 20, 31, 0.08);
 }
 
-.insights-bar {
+.insights-note {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: start;
@@ -364,41 +364,23 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 }
 
 .insights-label {
-  color: #6a6470;
-  font-size: 0.64rem;
+  color: #777180;
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding-top: 6px;
+  padding-top: 2px;
 }
 
-.insights-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.insights-inline {
+  display: grid;
+  gap: 2px;
 }
 
-.insight-card {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(24, 20, 31, 0.08);
-}
-
-.insight-card strong {
-  color: #18151d;
-  font-size: 0.74rem;
-  line-height: 1.2;
-}
-
-.insight-card span {
-  color: #645e6b;
-  font-size: 0.69rem;
-  line-height: 1.2;
+.insight-inline-item {
+  color: #68626e;
+  font-size: 0.71rem;
+  line-height: 1.35;
 }
 
 .headline-module {
