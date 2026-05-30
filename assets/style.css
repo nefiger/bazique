@@ -452,6 +452,9 @@ select {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(24, 20, 31, 0.08);
   box-shadow: 0 8px 26px rgba(17, 18, 22, 0.06);
+  position: sticky;
+  top: 78px;
+  z-index: 20;
 }
 
 .control-summary {
@@ -555,6 +558,27 @@ select {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.theme-chip-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.theme-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(127, 119, 221, 0.1);
+  color: #5c56ad;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .quote-card p {

@@ -75,10 +75,10 @@
         <div class="hero-banner">
           <article class="hero-panel fade-up">
             <p class="eyebrow">Post-event review snapshot</p>
-            <h1>Bazique 2026 feedback dashboard.</h1>
+            <h1>Guest, vendor, and overlap signals.</h1>
             <p>
-              Compact analysis view for guest experience, vendor trading conditions, and
-              the shared operational pressure points between them.
+              Filter the response set by operational theme, sentiment, and marketplace
+              behaviour to find overlaps and pressure points quickly.
             </p>
             <div class="hero-tags">
               <span class="pill">102 cleaned guest responses</span>
@@ -516,15 +516,15 @@
         activeTab: "guest",
         guestRatingFilter: "all",
         guestReturnFilter: "all",
-        guestPurchaseFilter: "all",
-        guestPrebrowseFilter: "all",
+        guestCommerceFilter: "all",
+        guestThemeFilter: "all",
         guestQuoteFilter: "all",
         guestQuoteVisible: 12,
         vendorWifiFilter: "all",
         vendorInterestFilter: "all",
         vendorResponseFilter: "all",
         vendorTypeFilter: "all",
-        vendorReturnFilter: "all",
+        vendorThemeFilter: "all",
         vendorResponseVisible: 12,
         vendorMarketplaceFilter: "all",
         vendorMarketplaceVisible: 12,
@@ -952,7 +952,49 @@
             type: entry.type,
             label: entry.marketplace_interest,
             text: entry.marketplace_thoughts,
+            themes: detectVendorThemes(entry),
           }));
+      }
+
+      function detectGuestThemes(entry) {
+        const text = [
+          entry.best_part,
+          entry.shortfalls,
+          entry.merch_thoughts,
+          entry.wishlist_artist,
+          entry.improvements,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        const themes = [];
+        if (/wifi|wi-fi|signal|network|card|payment|pay/.test(text)) themes.push("Connectivity");
+        if (/toilet|shower|water|parking|glamping|shade|seat|seating|ablution|comfort/.test(text)) themes.push("Comfort");
+        if (/layout|signage|flow|traffic|confusion|walk|wayfinding|spaces/.test(text)) themes.push("Layout");
+        if (/food|drink|vendor|stall|market|purchase/.test(text)) themes.push("Market");
+        if (/music|dj|artist|lineup|stage|decor|art|installation|laser|lights/.test(text)) themes.push("Music & art");
+        return themes.length ? themes : ["General"];
+      }
+
+      function detectVendorThemes(entry) {
+        const text = [
+          entry.pre_event_feedback,
+          entry.onsite_feedback,
+          entry.vm_feedback,
+          entry.improvements_2027,
+          entry.marketplace_thoughts,
+          entry.other_feedback,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        const themes = [];
+        if (/wifi|wi-fi|signal|network|card|payment|pay|connectivity/.test(text)) themes.push("Connectivity");
+        if (/layout|location|traffic|walk|flow|position|signage/.test(text)) themes.push("Layout");
+        if (/toilet|shower|water|power|ablution|wash|infrastructure|facility/.test(text)) themes.push("Facilities");
+        if (/vendor|stall|competition|food|market|foot traffic/.test(text)) themes.push("Vendor mix");
+        if (/support|communication|team|jennifer|jen|management|staff/.test(text)) themes.push("Support");
+        return themes.length ? themes : ["General"];
       }
 
       function filterGuestData(guest) {
@@ -972,15 +1014,27 @@
           ) {
             return false;
           }
+          if (state.guestCommerceFilter === "missed" && entry.missed_purchase === "No") {
+            return false;
+          }
+          if (state.guestCommerceFilter === "not_missed" && entry.missed_purchase !== "No") {
+            return false;
+          }
           if (
-            state.guestPurchaseFilter !== "all" &&
-            entry.missed_purchase !== state.guestPurchaseFilter
+            state.guestCommerceFilter === "prebrowse_positive" &&
+            !["Yes - I'd definitely use that", "Probably - sounds handy"].includes(entry.prebrowse_interest)
           ) {
             return false;
           }
           if (
-            state.guestPrebrowseFilter !== "all" &&
-            entry.prebrowse_interest !== state.guestPrebrowseFilter
+            state.guestCommerceFilter === "prebrowse_negative" &&
+            entry.prebrowse_interest !== "Not really - I enjoy discovering things on the day"
+          ) {
+            return false;
+          }
+          if (
+            state.guestThemeFilter !== "all" &&
+            !detectGuestThemes(entry).includes(state.guestThemeFilter)
           ) {
             return false;
           }
@@ -997,14 +1051,14 @@
             return false;
           }
           if (
-            state.vendorReturnFilter !== "all" &&
-            entry.return_intent !== state.vendorReturnFilter
+            state.vendorInterestFilter !== "all" &&
+            entry.marketplace_interest !== state.vendorInterestFilter
           ) {
             return false;
           }
           if (
-            state.vendorInterestFilter !== "all" &&
-            entry.marketplace_interest !== state.vendorInterestFilter
+            state.vendorThemeFilter !== "all" &&
+            !detectVendorThemes(entry).includes(state.vendorThemeFilter)
           ) {
             return false;
           }
@@ -1047,31 +1101,34 @@
             },
           },
           {
-            label: "Missed purchase",
-            value: state.guestPurchaseFilter,
+            label: "Commerce signal",
+            value: state.guestCommerceFilter,
             options: [
-              { value: "all", label: "All purchase responses" },
-              { value: "No", label: "No missed purchase" },
-              { value: "Yes, once", label: "Yes, once" },
-              { value: "Yes, more than once", label: "Yes, more than once" },
+              { value: "all", label: "All commerce responses" },
+              { value: "missed", label: "Missed purchase" },
+              { value: "not_missed", label: "No missed purchase" },
+              { value: "prebrowse_positive", label: "Pre-browse positive" },
+              { value: "prebrowse_negative", label: "Discovery-first" },
             ],
             onChange: (value) => {
-              state.guestPurchaseFilter = value;
+              state.guestCommerceFilter = value;
               state.guestQuoteVisible = 12;
               renderDashboard();
             },
           },
           {
-            label: "Pre-browse interest",
-            value: state.guestPrebrowseFilter,
+            label: "Narrative theme",
+            value: state.guestThemeFilter,
             options: [
-              { value: "all", label: "All pre-browse answers" },
-              { value: "Yes - I'd definitely use that", label: "Definitely use" },
-              { value: "Probably - sounds handy", label: "Probably useful" },
-              { value: "Not really - I enjoy discovering things on the day", label: "Not really" },
+              { value: "all", label: "All themes" },
+              { value: "Connectivity", label: "Connectivity" },
+              { value: "Comfort", label: "Comfort" },
+              { value: "Layout", label: "Layout" },
+              { value: "Market", label: "Market" },
+              { value: "Music & art", label: "Music & art" },
             ],
             onChange: (value) => {
-              state.guestPrebrowseFilter = value;
+              state.guestThemeFilter = value;
               state.guestQuoteVisible = 12;
               renderDashboard();
             },
@@ -1240,7 +1297,9 @@
           max: undefined,
         });
         document.getElementById("guest-improvements-summary").textContent =
-          `${sortedImprovements[0][0]} was the most frequent guest request.`;
+          sortedImprovements.length
+            ? `${sortedImprovements[0][0]} was the most frequent guest request.`
+            : "No improvement responses in this slice.";
 
         const missedOrder = ["No", "Yes, once", "Yes, more than once"];
         const missedCounts = countBy(guest, (entry) => entry.missed_purchase, missedOrder);
@@ -1308,7 +1367,12 @@
           buttonId: "guest-show-more",
           entries: quotes,
           visible: state.guestQuoteVisible,
-          makeMeta: (entry) => `<span>${escapeHtml(entry.label)}</span>`,
+          makeMeta: (entry) => {
+            const themes = detectGuestThemes({ best_part: entry.text })
+              .map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`)
+              .join("");
+            return `<span>${escapeHtml(entry.label)}</span><span class="theme-chip-row">${themes}</span>`;
+          },
           emptyMessage: "No guest responses in this filter.",
           onShowMore: () => {
             state.guestQuoteVisible += 12;
@@ -1350,21 +1414,6 @@
             },
           },
           {
-            label: "Return intent",
-            value: state.vendorReturnFilter,
-            options: [
-              { value: "all", label: "All return intent" },
-              { value: "Yes, definitely", label: "Yes" },
-              { value: "Probably - depends on the details", label: "Probably" },
-              { value: "Unlikely", label: "Unlikely" },
-            ],
-            onChange: (value) => {
-              state.vendorReturnFilter = value;
-              state.vendorResponseVisible = 12;
-              renderDashboard();
-            },
-          },
-          {
             label: "Marketplace interest",
             value: state.vendorInterestFilter,
             options: [
@@ -1376,6 +1425,24 @@
             ],
             onChange: (value) => {
               state.vendorInterestFilter = value;
+              state.vendorResponseVisible = 12;
+              state.vendorMarketplaceVisible = 12;
+              renderDashboard();
+            },
+          },
+          {
+            label: "Operational theme",
+            value: state.vendorThemeFilter,
+            options: [
+              { value: "all", label: "All themes" },
+              { value: "Connectivity", label: "Connectivity" },
+              { value: "Layout", label: "Layout" },
+              { value: "Facilities", label: "Facilities" },
+              { value: "Vendor mix", label: "Vendor mix" },
+              { value: "Support", label: "Support" },
+            ],
+            onChange: (value) => {
+              state.vendorThemeFilter = value;
               state.vendorResponseVisible = 12;
               state.vendorMarketplaceVisible = 12;
               renderDashboard();
@@ -1473,7 +1540,9 @@
           max: undefined,
         });
         document.getElementById("vendor-improvements-summary").textContent =
-          `${sortedVendorImprovements[0][0]} was the dominant vendor ask.`;
+          sortedVendorImprovements.length
+            ? `${sortedVendorImprovements[0][0]} was the dominant vendor ask.`
+            : "No vendor improvement responses in this slice.";
 
         const interestOrder = [
           "Very interested - I'd want to be involved from the start",
@@ -1544,8 +1613,12 @@
           buttonId: "vendor-show-more",
           entries: getVendorResponses(vendor),
           visible: state.vendorResponseVisible,
-          makeMeta: (entry) =>
-            `<span>${escapeHtml(entry.trading_name)}</span><span>${escapeHtml(entry.label)} · ${escapeHtml(entry.type)}</span>`,
+          makeMeta: (entry) => {
+            const themes = detectVendorThemes({ onsite_feedback: entry.text })
+              .map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`)
+              .join("");
+            return `<span>${escapeHtml(entry.trading_name)}</span><span>${escapeHtml(entry.label)} · ${escapeHtml(entry.type)}</span><span class="theme-chip-row">${themes}</span>`;
+          },
           emptyMessage: "No vendor responses in this filter.",
           onShowMore: () => {
             state.vendorResponseVisible += 12;
@@ -1561,8 +1634,12 @@
           buttonId: "vendor-marketplace-show-more",
           entries: getVendorMarketplaceCards(vendor),
           visible: state.vendorMarketplaceVisible,
-          makeMeta: (entry) =>
-            `<span>${escapeHtml(entry.trading_name)}</span><span>${escapeHtml(entry.label)}</span>`,
+          makeMeta: (entry) => {
+            const themes = (entry.themes || [])
+              .map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`)
+              .join("");
+            return `<span>${escapeHtml(entry.trading_name)}</span><span>${escapeHtml(entry.label)}</span><span class="theme-chip-row">${themes}</span>`;
+          },
           emptyMessage: "No marketplace comments in this filter.",
           onShowMore: () => {
             state.vendorMarketplaceVisible += 12;
