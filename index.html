@@ -1,0 +1,1504 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bazique 2026 Feedback Dashboard</title>
+    <meta
+      name="description"
+      content="Interactive static dashboard for Bazique 2026 guest and vendor feedback."
+    />
+    <link rel="stylesheet" href="./assets/style.css" />
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#top">
+          <img class="brand-logo" src="./assets/bazique-logo.svg" alt="" />
+          <span class="brand-copy">
+            <span class="brand-title">Bazique 2026</span>
+            <span class="brand-subtitle">Feedback dashboard</span>
+          </span>
+        </a>
+
+        <div class="tablist" role="tablist" aria-label="Dashboard sections">
+          <button
+            class="tab-button"
+            type="button"
+            role="tab"
+            id="tab-guest"
+            aria-controls="panel-guest"
+            aria-selected="true"
+            data-tab="guest"
+          >
+            Guest Feedback
+          </button>
+          <button
+            class="tab-button"
+            type="button"
+            role="tab"
+            id="tab-vendor"
+            aria-controls="panel-vendor"
+            aria-selected="false"
+            data-tab="vendor"
+          >
+            Vendor Feedback
+          </button>
+          <button
+            class="tab-button"
+            type="button"
+            role="tab"
+            id="tab-combined"
+            aria-controls="panel-combined"
+            aria-selected="false"
+            data-tab="combined"
+          >
+            Combined View
+          </button>
+        </div>
+
+        <div class="report-links" aria-label="Report links">
+          <span class="ghost-chip" aria-disabled="true">Guest report pending</span>
+          <span class="ghost-chip" aria-disabled="true">Vendor report pending</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-shell" id="top">
+      <section class="hero">
+        <div class="hero-banner">
+          <article class="hero-panel fade-up">
+            <p class="eyebrow">Post-event review snapshot</p>
+            <h1>Bazique 2026 in one interactive reporting surface.</h1>
+            <p>
+              Guest experience, vendor experience, and cross-dataset signals are all
+              explorable here. The dashboard is static, public-safe, and driven only by
+              cleaned JSON files generated from the original survey exports.
+            </p>
+            <div class="hero-tags">
+              <span class="pill">102 cleaned guest responses</span>
+              <span class="pill">11 vendor responses</span>
+              <span class="pill">Static GitHub Pages build</span>
+            </div>
+          </article>
+
+          <aside class="insight-panel fade-up delay-1" aria-label="Overview insights">
+            <p class="eyebrow">Immediate signals</p>
+            <div class="insight-list">
+              <div class="insight-item">
+                <span class="insight-label">Strongest guest score</span>
+                <span class="insight-value" id="hero-guest-highlight">Loading...</span>
+              </div>
+              <div class="insight-item">
+                <span class="insight-label">Biggest vendor friction</span>
+                <span class="insight-value" id="hero-vendor-highlight">Loading...</span>
+              </div>
+              <div class="insight-item">
+                <span class="insight-label">Shared planning theme</span>
+                <span class="insight-value" id="hero-combined-highlight">Loading...</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section
+        class="tab-panel section-block fade-up delay-2"
+        id="panel-guest"
+        role="tabpanel"
+        aria-labelledby="tab-guest"
+      >
+        <div class="section-head">
+          <h2>Guest feedback</h2>
+          <p>
+            Ratings, space performance, and the open-text signal behind the headline
+            scores.
+          </p>
+        </div>
+
+        <div class="metrics-grid" id="guest-metrics"></div>
+
+        <div class="chart-grid two-col">
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Overall rating distribution</h3>
+            </div>
+            <p class="chart-caption" id="guest-overall-summary"></p>
+            <div class="chart-wrap compact">
+              <canvas id="guest-overall-chart" aria-label="Guest overall rating distribution"></canvas>
+            </div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Return intent for 2027</h3>
+            </div>
+            <p class="chart-caption" id="guest-return-summary"></p>
+            <div class="chart-wrap compact">
+              <canvas id="guest-return-chart" aria-label="Guest return intent for 2027"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <div class="chart-grid two-col">
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Facilities ratings</h3>
+            </div>
+            <p class="chart-caption" id="guest-facilities-summary"></p>
+            <div class="chart-wrap">
+              <canvas id="guest-facilities-chart" aria-label="Guest ratings for festival facilities"></canvas>
+            </div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Market ratings</h3>
+            </div>
+            <p class="chart-caption" id="guest-market-summary"></p>
+            <div class="chart-wrap">
+              <canvas id="guest-market-chart" aria-label="Guest ratings for the market"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <div class="chart-grid two-col">
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Space visit reach</h3>
+            </div>
+            <p class="chart-caption" id="guest-space-reach-summary"></p>
+            <div class="chart-wrap">
+              <canvas id="guest-space-reach-chart" aria-label="Guest visit reach by space"></canvas>
+            </div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Space ratings</h3>
+            </div>
+            <p class="chart-caption" id="guest-space-rating-summary"></p>
+            <div class="chart-wrap">
+              <canvas id="guest-space-rating-chart" aria-label="Guest ratings by space"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <h3 class="chart-title">What would make 2027 better?</h3>
+          </div>
+          <p class="chart-caption" id="guest-improvements-summary"></p>
+          <div class="chart-wrap">
+            <canvas id="guest-improvements-chart" aria-label="Guest improvement ideas for 2027"></canvas>
+          </div>
+        </article>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Quote explorer</h3>
+            <p>
+              Filter the guest open-text responses by topic. Names and IDs are not
+              shown here.
+            </p>
+          </div>
+
+          <div class="filter-block">
+            <div class="filter-row" id="guest-quote-filters" aria-label="Guest quote filters"></div>
+            <p class="microcopy" id="guest-quote-count"></p>
+          </div>
+
+          <div class="quotes-grid" id="guest-quotes"></div>
+          <button class="show-more" id="guest-show-more" type="button">Show more guest quotes</button>
+        </section>
+
+        <section class="subsection-card">
+          <div class="subsection-head">
+            <p class="eyebrow">Marketplace intelligence</p>
+            <h3>Planning signals outside the core festival ratings</h3>
+            <p>
+              These answers were asked separately to explore missed sales, browsing
+              behaviour, and possible take-home product ideas.
+            </p>
+          </div>
+
+          <div class="chart-grid two-col">
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Missed purchase moments</h3>
+              </div>
+              <p class="chart-caption" id="guest-missed-summary"></p>
+              <div class="chart-wrap compact">
+                <canvas id="guest-missed-chart" aria-label="Guest missed purchase moments"></canvas>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Pre-browse interest</h3>
+              </div>
+              <p class="chart-caption" id="guest-prebrowse-summary"></p>
+              <div class="chart-wrap compact">
+                <canvas id="guest-prebrowse-chart" aria-label="Guest interest in pre-browsing vendors"></canvas>
+              </div>
+            </article>
+          </div>
+
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Merch category mentions</h3>
+            </div>
+            <p class="chart-caption">
+              Manual tagging from the guest merch-thought responses, supplied in the
+              specification.
+            </p>
+            <div class="chart-wrap">
+              <canvas id="guest-merch-chart" aria-label="Guest merch category mentions"></canvas>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <section
+        class="tab-panel section-block"
+        id="panel-vendor"
+        role="tabpanel"
+        aria-labelledby="tab-vendor"
+        hidden
+      >
+        <div class="section-head">
+          <h2>Vendor feedback</h2>
+          <p>
+            Trading conditions, vendor management, marketplace interest, and how vendor
+            experience split across food and non-food traders.
+          </p>
+        </div>
+
+        <div class="metrics-grid" id="vendor-metrics"></div>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <h3 class="chart-title">Core vendor ratings</h3>
+          </div>
+          <p class="chart-caption" id="vendor-rating-summary"></p>
+          <div class="chart-wrap">
+            <canvas id="vendor-ratings-chart" aria-label="Vendor ratings across communication, support, infrastructure, admin, and location"></canvas>
+          </div>
+        </article>
+
+        <div class="chart-grid two-col">
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">WiFi impact</h3>
+            </div>
+            <p class="chart-caption" id="vendor-wifi-summary"></p>
+            <div class="chart-wrap compact">
+              <canvas id="vendor-wifi-chart" aria-label="Vendor WiFi outage impact"></canvas>
+            </div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Return to 2027</h3>
+            </div>
+            <p class="chart-caption" id="vendor-return-summary"></p>
+            <div class="chart-wrap compact">
+              <canvas id="vendor-return-chart" aria-label="Vendor return intent for 2027"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <h3 class="chart-title">What would improve Bazique 2027 for vendors?</h3>
+          </div>
+          <p class="chart-caption" id="vendor-improvements-summary"></p>
+          <div class="chart-wrap">
+            <canvas id="vendor-improvements-chart" aria-label="Vendor improvement requests for 2027"></canvas>
+          </div>
+        </article>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Vendor response explorer</h3>
+            <p>
+              Explore written responses by topic and filter between food and non-food
+              traders.
+            </p>
+          </div>
+
+          <div class="filter-block">
+            <div class="filter-row" id="vendor-response-filters" aria-label="Vendor response filters"></div>
+            <div class="type-toggle" id="vendor-type-filters" aria-label="Vendor type filters"></div>
+            <p class="microcopy" id="vendor-response-count"></p>
+          </div>
+
+          <div class="quotes-grid" id="vendor-responses"></div>
+          <button class="show-more" id="vendor-show-more" type="button">Show more vendor responses</button>
+        </section>
+
+        <section class="subsection-card">
+          <div class="subsection-head">
+            <p class="eyebrow">Marketplace intelligence</p>
+            <h3>Who wants an online marketplace, and on what terms?</h3>
+            <p>
+              The chart tracks participation appetite. The cards below isolate the
+              marketplace-specific commentary.
+            </p>
+          </div>
+
+          <div class="chart-grid two-col">
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Marketplace interest</h3>
+              </div>
+              <p class="chart-caption" id="vendor-marketplace-summary"></p>
+              <div class="chart-wrap compact">
+                <canvas id="vendor-marketplace-chart" aria-label="Vendor marketplace interest"></canvas>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Marketplace comment filter</h3>
+              </div>
+              <p class="chart-caption">Toggle between all, interested, and hesitant vendor comments.</p>
+              <div class="filter-row" id="vendor-marketplace-filters" aria-label="Vendor marketplace thought filters"></div>
+              <p class="microcopy" id="vendor-marketplace-count"></p>
+            </article>
+          </div>
+
+          <div class="quotes-grid" id="vendor-marketplace-cards"></div>
+          <button class="show-more" id="vendor-marketplace-show-more" type="button">
+            Show more marketplace comments
+          </button>
+        </section>
+      </section>
+
+      <section
+        class="tab-panel section-block"
+        id="panel-combined"
+        role="tabpanel"
+        aria-labelledby="tab-combined"
+        hidden
+      >
+        <div class="section-head">
+          <h2>Combined view</h2>
+          <p>
+            Synthesis only. This tab compares themes and direction-of-travel across the
+            guest and vendor datasets without exposing raw individual-level entries.
+          </p>
+        </div>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Shared themes</h3>
+            <p>The clearest overlap between attendee experience and trading conditions.</p>
+          </div>
+
+          <div class="callout-grid" id="combined-themes"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Marketplace signal</h3>
+            <p>Supply-side and demand-side appetite for a pre/post-event commerce layer.</p>
+          </div>
+
+          <div class="signal-grid two-up" id="combined-marketplace-signals"></div>
+          <article class="signal-card">
+            <span class="badge">Interpretation</span>
+            <p id="combined-marketplace-note"></p>
+          </article>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Return intent comparison</h3>
+            <p>Guest and vendor likelihood to come back in 2027 using the same color scale.</p>
+          </div>
+
+          <div class="split-chart-grid">
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Guests</h3>
+              </div>
+              <p class="chart-caption" id="combined-guest-return-summary"></p>
+              <div class="chart-wrap compact">
+                <canvas id="combined-guest-return-chart" aria-label="Guest return intent comparison chart"></canvas>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Vendors</h3>
+              </div>
+              <p class="chart-caption" id="combined-vendor-return-summary"></p>
+              <div class="chart-wrap compact">
+                <canvas id="combined-vendor-return-chart" aria-label="Vendor return intent comparison chart"></canvas>
+              </div>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <p class="footer-note">
+        Built as a static dashboard from cleaned survey exports only. No backend, no
+        local storage, and no raw spreadsheet data committed to git.
+      </p>
+    </main>
+
+    <script>
+      const colors = {
+        teal: "#1D9E75",
+        tealDeep: "#177A5C",
+        amber: "#EF9F27",
+        coral: "#D85A30",
+        blue: "#378ADD",
+        purple: "#7F77DD",
+        ink: "#222222",
+        muted: "#666666",
+        border: "#E0E0E0",
+      };
+
+      const guestQuoteConfig = [
+        { id: "all", label: "All", field: null },
+        { id: "best_part", label: "Best part", field: "best_part" },
+        { id: "shortfalls", label: "Shortfalls", field: "shortfalls" },
+        { id: "merch_thoughts", label: "Merch thoughts", field: "merch_thoughts" },
+        { id: "wishlist_artist", label: "Artist wishlist", field: "wishlist_artist" },
+      ];
+
+      const vendorResponseConfig = [
+        { id: "all", label: "All", field: null },
+        { id: "pre_event_feedback", label: "Pre-event feedback", field: "pre_event_feedback" },
+        { id: "onsite_feedback", label: "On-site feedback", field: "onsite_feedback" },
+        { id: "vm_feedback", label: "VM feedback", field: "vm_feedback" },
+        { id: "improvements_2027", label: "2027 improvements", field: "improvements_2027" },
+        { id: "marketplace_thoughts", label: "Marketplace thoughts", field: "marketplace_thoughts" },
+      ];
+
+      const merchMentionData = [
+        ["Stickers", 12],
+        ["Keyrings / keychains", 9],
+        ["Reusable cups or bottles", 7],
+        ["T-shirts / caps", 7],
+        ["Wristbands / bracelets", 6],
+        ["Playlists / aftermovie", 5],
+        ["Photo booth / polaroid", 4],
+      ];
+
+      const charts = new Map();
+
+      const state = {
+        activeTab: "guest",
+        guestQuoteFilter: "all",
+        guestQuoteVisible: 12,
+        vendorResponseFilter: "all",
+        vendorTypeFilter: "all",
+        vendorResponseVisible: 12,
+        vendorMarketplaceFilter: "all",
+        vendorMarketplaceVisible: 12,
+      };
+
+      const categoryColors = {
+        guestReturn: {
+          "Definitely - already planning it": colors.teal,
+          "Very likely": "#49B98F",
+          "Probably": colors.amber,
+          "Not sure": "#B7A24A",
+          "Unlikely": colors.coral,
+        },
+        vendorReturn: {
+          "Yes, definitely": colors.teal,
+          "Probably - depends on the details": colors.amber,
+          "Unlikely": colors.coral,
+        },
+        wifiImpact: {
+          "Yes - it had a significant impact and I wasn't able to recover the lost time": colors.coral,
+          "Yes - it was disruptive but I recovered some ground later": colors.amber,
+          "Somewhat - I found workarounds and managed to keep trading": colors.blue,
+        },
+        prebrowse: {
+          "Yes - I'd definitely use that": colors.teal,
+          "Probably - sounds handy": colors.blue,
+          "Not really - I enjoy discovering things on the day": colors.amber,
+        },
+        marketplaceInterest: {
+          "Very interested - I'd want to be involved from the start": colors.teal,
+          "Interested - tell me more": colors.blue,
+          "Not sure - depends on how it works": colors.amber,
+          "Not for me": colors.coral,
+        },
+      };
+
+      const vendorMarketplaceCategories = {
+        all: () => true,
+        interested: (entry) =>
+          [
+            "Very interested - I'd want to be involved from the start",
+            "Interested - tell me more",
+          ].includes(entry.marketplace_interest),
+        hesitant: (entry) =>
+          [
+            "Not sure - depends on how it works",
+            "Not for me",
+          ].includes(entry.marketplace_interest),
+      };
+
+      function fmtNumber(value, digits = 2) {
+        return Number(value).toFixed(digits);
+      }
+
+      function fmtPercent(value, digits = 0) {
+        return `${Number(value).toFixed(digits)}%`;
+      }
+
+      function average(values) {
+        const filtered = values.filter((value) => typeof value === "number");
+        if (!filtered.length) {
+          return 0;
+        }
+        return filtered.reduce((sum, value) => sum + value, 0) / filtered.length;
+      }
+
+      function countBy(items, accessor, order = []) {
+        const counts = new Map(order.map((key) => [key, 0]));
+        items.forEach((item) => {
+          const key = accessor(item);
+          if (!key) {
+            return;
+          }
+          counts.set(key, (counts.get(key) || 0) + 1);
+        });
+        return counts;
+      }
+
+      function asEntries(countMap) {
+        return Array.from(countMap.entries());
+      }
+
+      function parseMultiSelect(value) {
+        if (!value) {
+          return [];
+        }
+        return value
+          .split(",")
+          .map((entry) => entry.trim())
+          .filter(Boolean);
+      }
+
+      function titleCaseLabel(value) {
+        return value.replaceAll("_", " ").replace(/\b\w/g, (match) => match.toUpperCase());
+      }
+
+      function ratingColor(value) {
+        if (value >= 4.2) {
+          return colors.teal;
+        }
+        if (value >= 3.4) {
+          return colors.amber;
+        }
+        return colors.coral;
+      }
+
+      function buildMetricCards(targetId, items) {
+        const target = document.getElementById(targetId);
+        target.innerHTML = items
+          .map(
+            (item) => `
+              <article class="metric-card">
+                <span class="metric-label">${item.label}</span>
+                <span class="metric-value">${item.value}</span>
+                <span class="metric-note">${item.note}</span>
+              </article>
+            `,
+          )
+          .join("");
+      }
+
+      function destroyChart(id) {
+        if (charts.has(id)) {
+          charts.get(id).destroy();
+          charts.delete(id);
+        }
+      }
+
+      function baseChartOptions(extra = {}) {
+        return {
+          animation: false,
+          maintainAspectRatio: false,
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: colors.ink,
+                usePointStyle: true,
+                boxWidth: 10,
+              },
+            },
+            tooltip: {
+              enabled: true,
+            },
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted },
+              grid: { color: "rgba(34,34,34,0.08)" },
+              border: { color: "rgba(34,34,34,0.12)" },
+            },
+            y: {
+              ticks: { color: colors.ink },
+              grid: { display: false },
+              border: { display: false },
+            },
+          },
+          ...extra,
+        };
+      }
+
+      function createChart(id, config) {
+        destroyChart(id);
+        const canvas = document.getElementById(id);
+        const context = canvas.getContext("2d");
+        const chart = new Chart(context, config);
+        charts.set(id, chart);
+        return chart;
+      }
+
+      function makeBarChart(id, { labels, values, color, axis = "x", min = 0, max = 5 }) {
+        const backgroundColors = Array.isArray(color) ? color : labels.map(() => color);
+        createChart(id, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                data: values,
+                backgroundColor: backgroundColors,
+                borderRadius: 8,
+                maxBarThickness: axis === "y" ? 28 : 52,
+              },
+            ],
+          },
+          options: baseChartOptions({
+            indexAxis: axis,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (context) => `${context.raw}`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                min: axis === "x" ? min : undefined,
+                max: axis === "x" ? max : undefined,
+                ticks: { color: colors.muted },
+                grid: { color: "rgba(34,34,34,0.08)" },
+                border: { color: "rgba(34,34,34,0.12)" },
+              },
+              y: {
+                min: axis === "y" ? min : undefined,
+                max: axis === "y" ? max : undefined,
+                ticks: { color: colors.ink },
+                grid: { display: false },
+                border: { display: false },
+              },
+            },
+          }),
+        });
+      }
+
+      function makeStackedSingleBar(id, categories, counts, palette, axis = "y") {
+        const labels = [""];
+        createChart(id, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: categories.map((category) => ({
+              label: category,
+              data: [counts.get(category) || 0],
+              backgroundColor: palette[category] || colors.blue,
+              borderRadius: 8,
+              maxBarThickness: 38,
+            })),
+          },
+          options: baseChartOptions({
+            indexAxis: axis,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context) => `${context.dataset.label}: ${context.raw}`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                stacked: true,
+                ticks: { color: colors.muted },
+                grid: { color: "rgba(34,34,34,0.08)" },
+                border: { color: "rgba(34,34,34,0.12)" },
+              },
+              y: {
+                stacked: true,
+                ticks: { display: false },
+                grid: { display: false },
+                border: { display: false },
+              },
+            },
+          }),
+        });
+      }
+
+      function renderFilterButtons(targetId, items, activeId, onClick) {
+        const target = document.getElementById(targetId);
+        target.innerHTML = "";
+        items.forEach((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "filter-chip";
+          button.textContent = item.label;
+          button.setAttribute("aria-pressed", String(item.id === activeId));
+          button.addEventListener("click", () => onClick(item.id));
+          target.appendChild(button);
+        });
+      }
+
+      function renderQuoteCards({
+        targetId,
+        countId,
+        buttonId,
+        entries,
+        visible,
+        makeMeta,
+        emptyMessage,
+        onShowMore,
+      }) {
+        const target = document.getElementById(targetId);
+        const count = document.getElementById(countId);
+        const button = document.getElementById(buttonId);
+        const shown = entries.slice(0, visible);
+
+        count.textContent = `${entries.length} responses in this view`;
+
+        if (!entries.length) {
+          target.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+          button.hidden = true;
+          return;
+        }
+
+        target.innerHTML = shown
+          .map(
+            (entry) => `
+              <article class="quote-card">
+                <div class="quote-meta">${makeMeta(entry)}</div>
+                <p>${escapeHtml(entry.text)}</p>
+              </article>
+            `,
+          )
+          .join("");
+
+        button.hidden = shown.length >= entries.length;
+        button.onclick = onShowMore;
+      }
+
+      function escapeHtml(value) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function renderTabs() {
+        document.querySelectorAll(".tab-button").forEach((button) => {
+          const selected = button.dataset.tab === state.activeTab;
+          button.setAttribute("aria-selected", String(selected));
+          document.getElementById(`panel-${button.dataset.tab}`).hidden = !selected;
+        });
+      }
+
+      function getGuestQuotes(guest) {
+        const active = guestQuoteConfig.find((item) => item.id === state.guestQuoteFilter);
+        if (active.id === "all") {
+          return guest.flatMap((entry) =>
+            guestQuoteConfig
+              .filter((item) => item.field)
+              .map((item) => ({
+                label: item.label,
+                text: entry[item.field],
+              }))
+              .filter((item) => item.text),
+          );
+        }
+
+        return guest
+          .filter((entry) => entry[active.field])
+          .map((entry) => ({
+            label: active.label,
+            text: entry[active.field],
+          }));
+      }
+
+      function getVendorResponses(vendor) {
+        const active = vendorResponseConfig.find((item) => item.id === state.vendorResponseFilter);
+        const filteredByType =
+          state.vendorTypeFilter === "all"
+            ? vendor
+            : vendor.filter((entry) => entry.type === state.vendorTypeFilter);
+
+        if (active.id === "all") {
+          return filteredByType.flatMap((entry) =>
+            vendorResponseConfig
+              .filter((item) => item.field)
+              .map((item) => ({
+                trading_name: entry.trading_name,
+                type: entry.type,
+                label: item.label,
+                text: entry[item.field],
+              }))
+              .filter((item) => item.text),
+          );
+        }
+
+        return filteredByType
+          .filter((entry) => entry[active.field])
+          .map((entry) => ({
+            trading_name: entry.trading_name,
+            type: entry.type,
+            label: active.label,
+            text: entry[active.field],
+          }));
+      }
+
+      function getVendorMarketplaceCards(vendor) {
+        return vendor
+          .filter((entry) => entry.marketplace_thoughts)
+          .filter((entry) => vendorMarketplaceCategories[state.vendorMarketplaceFilter](entry))
+          .map((entry) => ({
+            trading_name: entry.trading_name,
+            type: entry.type,
+            label: entry.marketplace_interest,
+            text: entry.marketplace_thoughts,
+          }));
+      }
+
+      function renderGuestSection(guest) {
+        const rated45 = guest.filter((entry) => entry.overall_rating >= 4).length;
+        const returnDefinite = guest.filter(
+          (entry) => entry.return_intent === "Definitely - already planning it",
+        ).length;
+        const musicAvg = average(guest.map((entry) => entry.music_rating));
+
+        buildMetricCards("guest-metrics", [
+          {
+            label: "Overall rating",
+            value: `${fmtNumber(average(guest.map((entry) => entry.overall_rating)), 2)} / 5`,
+            note: "Average across all cleaned guest responses",
+          },
+          {
+            label: "Returning in 2027",
+            value: fmtPercent((returnDefinite / guest.length) * 100, 0),
+            note: "Definitely already planning it",
+          },
+          {
+            label: "Rated 4 or 5 stars",
+            value: fmtPercent((rated45 / guest.length) * 100, 0),
+            note: `${rated45} of ${guest.length} responses`,
+          },
+          {
+            label: "Music programme",
+            value: `${fmtNumber(musicAvg, 2)} / 5`,
+            note: "Average music rating",
+          },
+        ]);
+
+        const ratingOrder = [2, 3, 4, 5];
+        const overallCounts = countBy(guest, (entry) => entry.overall_rating, ratingOrder);
+        makeBarChart("guest-overall-chart", {
+          labels: ratingOrder.map((value) => `${value}★`),
+          values: ratingOrder.map((value) => overallCounts.get(value) || 0),
+          color: ratingOrder.map((value) => ratingColor(value)),
+          min: 0,
+          max: undefined,
+        });
+        document.getElementById("guest-overall-summary").textContent =
+          `${guest.filter((entry) => entry.overall_rating === 5).length} guests gave Bazique a full 5 stars.`;
+
+        const guestReturnOrder = [
+          "Definitely - already planning it",
+          "Very likely",
+          "Probably",
+          "Not sure",
+          "Unlikely",
+        ];
+        const guestReturnCounts = countBy(guest, (entry) => entry.return_intent, guestReturnOrder);
+        makeStackedSingleBar(
+          "guest-return-chart",
+          guestReturnOrder,
+          guestReturnCounts,
+          categoryColors.guestReturn,
+        );
+        document.getElementById("guest-return-summary").textContent =
+          `${guestReturnCounts.get("Definitely - already planning it") || 0} guests are already planning to return.`;
+
+        const facilityMap = [
+          ["Toilets availability", "facility_toilets_availability"],
+          ["Toilets cleanliness", "facility_toilets_cleanliness"],
+          ["Showers", "facility_showers"],
+          ["Water stations", "facility_water"],
+          ["Glamping", "facility_glamping"],
+          ["Parking", "facility_parking"],
+        ];
+        const facilityScores = facilityMap
+          .map(([label, key]) => ({
+            label,
+            score: average(guest.map((entry) => entry[key])),
+          }))
+          .sort((a, b) => a.score - b.score);
+        makeBarChart("guest-facilities-chart", {
+          labels: facilityScores.map((item) => item.label),
+          values: facilityScores.map((item) => Number(item.score.toFixed(2))),
+          color: facilityScores.map((item) => ratingColor(item.score)),
+          axis: "y",
+          min: 0,
+          max: 5,
+        });
+        document.getElementById("guest-facilities-summary").textContent =
+          `${facilityScores[0].label} scored lowest at ${fmtNumber(facilityScores[0].score, 2)}.`;
+
+        const marketMap = [
+          ["Food variety", "market_food_variety"],
+          ["Food quality", "market_food_quality"],
+          ["Stalls variety", "market_stalls_variety"],
+          ["Stalls quality", "market_stalls_quality"],
+        ];
+        const marketScores = marketMap.map(([label, key]) => ({
+          label,
+          score: average(guest.map((entry) => entry[key])),
+        }));
+        makeBarChart("guest-market-chart", {
+          labels: marketScores.map((item) => item.label),
+          values: marketScores.map((item) => Number(item.score.toFixed(2))),
+          color: marketScores.map((item) => ratingColor(item.score)),
+          axis: "y",
+          min: 0,
+          max: 5,
+        });
+        document.getElementById("guest-market-summary").textContent =
+          `${marketScores.filter((item) => item.score >= 4).length} of 4 market measures scored above 4.0.`;
+
+        const spaceMap = [
+          ["River stage", "space_river_stage"],
+          ["Tropical Roast", "space_tropical_roast"],
+          ["Elevate", "space_elevate"],
+          ["Shanti Wellness", "space_shanti"],
+          ["Secret Circus", "space_secret_circus"],
+        ];
+        const spaceReach = spaceMap.map(([label, key]) => ({
+          label,
+          reach: (guest.filter((entry) => typeof entry[key] === "number").length / guest.length) * 100,
+          rating: average(guest.map((entry) => entry[key])),
+        }));
+        makeBarChart("guest-space-reach-chart", {
+          labels: spaceReach.map((item) => item.label),
+          values: spaceReach.map((item) => Number(item.reach.toFixed(1))),
+          color: spaceReach.map(() => colors.blue),
+          axis: "y",
+          min: 0,
+          max: 100,
+        });
+        makeBarChart("guest-space-rating-chart", {
+          labels: spaceReach.map((item) => item.label),
+          values: spaceReach.map((item) => Number(item.rating.toFixed(2))),
+          color: spaceReach.map((item) => ratingColor(item.rating)),
+          axis: "y",
+          min: 0,
+          max: 5,
+        });
+        const topReach = [...spaceReach].sort((a, b) => b.reach - a.reach)[0];
+        const lowReach = [...spaceReach].sort((a, b) => a.reach - b.reach)[0];
+        document.getElementById("guest-space-reach-summary").textContent =
+          `${topReach.label} had the widest reach at ${fmtPercent(topReach.reach, 0)}. ${lowReach.label} was least visited.`;
+        document.getElementById("guest-space-rating-summary").textContent =
+          `${spaceReach
+            .slice()
+            .sort((a, b) => b.rating - a.rating)[0]
+            .label} earned the strongest average rating.`;
+
+        const improvementCounts = new Map();
+        guest.forEach((entry) => {
+          parseMultiSelect(entry.improvements).forEach((item) => {
+            improvementCounts.set(item, (improvementCounts.get(item) || 0) + 1);
+          });
+        });
+        const sortedImprovements = asEntries(improvementCounts).sort((a, b) => b[1] - a[1]);
+        makeBarChart("guest-improvements-chart", {
+          labels: sortedImprovements.map(([label]) => label),
+          values: sortedImprovements.map(([, value]) => value),
+          color: sortedImprovements.map(() => colors.teal),
+          axis: "y",
+          min: 0,
+          max: undefined,
+        });
+        document.getElementById("guest-improvements-summary").textContent =
+          `${sortedImprovements[0][0]} was the most frequent guest request.`;
+
+        const missedOrder = ["No", "Yes, once", "Yes, more than once"];
+        const missedCounts = countBy(guest, (entry) => entry.missed_purchase, missedOrder);
+        makeBarChart("guest-missed-chart", {
+          labels: missedOrder,
+          values: missedOrder.map((value) => missedCounts.get(value) || 0),
+          color: [colors.teal, colors.amber, colors.coral],
+          min: 0,
+          max: undefined,
+        });
+        document.getElementById("guest-missed-summary").textContent =
+          `${missedOrder
+            .slice(1)
+            .reduce((sum, key) => sum + (missedCounts.get(key) || 0), 0)} guests reported at least one missed purchase.`;
+
+        const prebrowseOrder = [
+          "Yes - I'd definitely use that",
+          "Probably - sounds handy",
+          "Not really - I enjoy discovering things on the day",
+        ];
+        const prebrowseCounts = countBy(guest, (entry) => entry.prebrowse_interest, prebrowseOrder);
+        makeStackedSingleBar(
+          "guest-prebrowse-chart",
+          prebrowseOrder,
+          prebrowseCounts,
+          categoryColors.prebrowse,
+        );
+        document.getElementById("guest-prebrowse-summary").textContent =
+          `${fmtPercent(
+            (((prebrowseCounts.get("Yes - I'd definitely use that") || 0) +
+              (prebrowseCounts.get("Probably - sounds handy") || 0)) /
+              guest.length) *
+              100,
+            0,
+          )} showed positive interest in browsing vendors ahead of time.`;
+
+        makeBarChart("guest-merch-chart", {
+          labels: merchMentionData.map(([label]) => label),
+          values: merchMentionData.map(([, value]) => value),
+          color: merchMentionData.map(() => colors.purple),
+          axis: "y",
+          min: 0,
+          max: undefined,
+        });
+
+        renderFilterButtons("guest-quote-filters", guestQuoteConfig, state.guestQuoteFilter, (id) => {
+          state.guestQuoteFilter = id;
+          state.guestQuoteVisible = 12;
+          renderGuestQuotes(guest);
+        });
+        renderGuestQuotes(guest);
+      }
+
+      function renderGuestQuotes(guest) {
+        renderFilterButtons("guest-quote-filters", guestQuoteConfig, state.guestQuoteFilter, (id) => {
+          state.guestQuoteFilter = id;
+          state.guestQuoteVisible = 12;
+          renderGuestQuotes(guest);
+        });
+
+        const quotes = getGuestQuotes(guest);
+        renderQuoteCards({
+          targetId: "guest-quotes",
+          countId: "guest-quote-count",
+          buttonId: "guest-show-more",
+          entries: quotes,
+          visible: state.guestQuoteVisible,
+          makeMeta: (entry) => `<span>${escapeHtml(entry.label)}</span>`,
+          emptyMessage: "No guest responses in this filter.",
+          onShowMore: () => {
+            state.guestQuoteVisible += 12;
+            renderGuestQuotes(guest);
+          },
+        });
+      }
+
+      function renderVendorSection(vendor) {
+        const responseRate = (vendor.length / 31) * 100;
+        const commsAvg = average(vendor.map((entry) => entry.rating_comms));
+        const adminAvg = average(vendor.map((entry) => entry.rating_admin));
+        const locationAvg = average(vendor.map((entry) => entry.rating_location));
+
+        buildMetricCards("vendor-metrics", [
+          {
+            label: "Responses",
+            value: `${vendor.length} of 31`,
+            note: `${fmtPercent(responseRate, 0)} response rate`,
+          },
+          {
+            label: "Comms rating",
+            value: `${fmtNumber(commsAvg, 2)} / 5`,
+            note: "Lead-up communication",
+          },
+          {
+            label: "Admin rating",
+            value: `${fmtNumber(adminAvg, 2)} / 5`,
+            note: "Onboarding and admin process",
+          },
+          {
+            label: "Location / foot traffic",
+            value: `${fmtNumber(locationAvg, 2)} / 5`,
+            note: "Weakest vendor score in the dataset",
+          },
+        ]);
+
+        const vendorRatings = [
+          ["Communication", commsAvg],
+          ["Admin", adminAvg],
+          ["Support", average(vendor.map((entry) => entry.rating_support))],
+          ["Infrastructure", average(vendor.map((entry) => entry.rating_infrastructure))],
+          ["Location", locationAvg],
+        ];
+        makeBarChart("vendor-ratings-chart", {
+          labels: vendorRatings.map(([label]) => label),
+          values: vendorRatings.map(([, score]) => Number(score.toFixed(2))),
+          color: vendorRatings.map(([, score]) => ratingColor(score)),
+          axis: "y",
+          min: 0,
+          max: 5,
+        });
+        document.getElementById("vendor-rating-summary").textContent =
+          `Location lagged behind the rest of the vendor experience at ${fmtNumber(locationAvg, 2)} / 5.`;
+
+        const wifiOrder = [
+          "Yes - it had a significant impact and I wasn't able to recover the lost time",
+          "Yes - it was disruptive but I recovered some ground later",
+          "Somewhat - I found workarounds and managed to keep trading",
+        ];
+        const wifiCounts = countBy(vendor, (entry) => entry.wifi_impact, wifiOrder);
+        makeStackedSingleBar("vendor-wifi-chart", wifiOrder, wifiCounts, categoryColors.wifiImpact);
+        document.getElementById("vendor-wifi-summary").textContent =
+          `${vendor.length} of ${vendor.length} vendors said the outage affected trading in some way.`;
+
+        const vendorReturnOrder = [
+          "Yes, definitely",
+          "Probably - depends on the details",
+          "Unlikely",
+        ];
+        const vendorReturnCounts = countBy(vendor, (entry) => entry.return_intent, vendorReturnOrder);
+        makeBarChart("vendor-return-chart", {
+          labels: ["Yes", "Probably", "Unlikely"],
+          values: vendorReturnOrder.map((key) => vendorReturnCounts.get(key) || 0),
+          color: vendorReturnOrder.map((key) => categoryColors.vendorReturn[key]),
+          min: 0,
+          max: undefined,
+        });
+        document.getElementById("vendor-return-summary").textContent =
+          `${vendorReturnCounts.get("Yes, definitely") || 0} vendors are already definite for 2027.`;
+
+        const vendorImprovementCounts = new Map();
+        vendor.forEach((entry) => {
+          parseMultiSelect(entry.improvements_2027).forEach((item) => {
+            vendorImprovementCounts.set(item, (vendorImprovementCounts.get(item) || 0) + 1);
+          });
+        });
+        const sortedVendorImprovements = asEntries(vendorImprovementCounts).sort((a, b) => b[1] - a[1]);
+        makeBarChart("vendor-improvements-chart", {
+          labels: sortedVendorImprovements.map(([label]) => label),
+          values: sortedVendorImprovements.map(([, value]) => value),
+          color: sortedVendorImprovements.map(() => colors.tealDeep),
+          axis: "y",
+          min: 0,
+          max: undefined,
+        });
+        document.getElementById("vendor-improvements-summary").textContent =
+          `${sortedVendorImprovements[0][0]} was the dominant vendor ask.`;
+
+        const interestOrder = [
+          "Very interested - I'd want to be involved from the start",
+          "Interested - tell me more",
+          "Not sure - depends on how it works",
+          "Not for me",
+        ];
+        const interestCounts = countBy(vendor, (entry) => entry.marketplace_interest, interestOrder);
+        makeBarChart("vendor-marketplace-chart", {
+          labels: ["Very interested", "Interested", "Not sure", "Not for me"],
+          values: interestOrder.map((key) => interestCounts.get(key) || 0),
+          color: interestOrder.map((key) => categoryColors.marketplaceInterest[key]),
+          axis: "y",
+          min: 0,
+          max: undefined,
+        });
+        document.getElementById("vendor-marketplace-summary").textContent =
+          `${(interestCounts.get("Very interested - I'd want to be involved from the start") || 0) +
+            (interestCounts.get("Interested - tell me more") || 0)} vendors showed active marketplace appetite.`;
+
+        renderFilterButtons(
+          "vendor-response-filters",
+          vendorResponseConfig,
+          state.vendorResponseFilter,
+          (id) => {
+            state.vendorResponseFilter = id;
+            state.vendorResponseVisible = 12;
+            renderVendorResponses(vendor);
+          },
+        );
+        renderFilterButtons(
+          "vendor-type-filters",
+          [
+            { id: "all", label: "All" },
+            { id: "Food", label: "Food" },
+            { id: "Non-food", label: "Non-food" },
+          ],
+          state.vendorTypeFilter,
+          (id) => {
+            state.vendorTypeFilter = id;
+            state.vendorResponseVisible = 12;
+            renderVendorResponses(vendor);
+          },
+        );
+        renderFilterButtons(
+          "vendor-marketplace-filters",
+          [
+            { id: "all", label: "All thoughts" },
+            { id: "interested", label: "Interested vendors" },
+            { id: "hesitant", label: "Hesitant vendors" },
+          ],
+          state.vendorMarketplaceFilter,
+          (id) => {
+            state.vendorMarketplaceFilter = id;
+            state.vendorMarketplaceVisible = 12;
+            renderVendorMarketplaceCards(vendor);
+          },
+        );
+
+        renderVendorResponses(vendor);
+        renderVendorMarketplaceCards(vendor);
+      }
+
+      function renderVendorResponses(vendor) {
+        renderQuoteCards({
+          targetId: "vendor-responses",
+          countId: "vendor-response-count",
+          buttonId: "vendor-show-more",
+          entries: getVendorResponses(vendor),
+          visible: state.vendorResponseVisible,
+          makeMeta: (entry) =>
+            `<span>${escapeHtml(entry.trading_name)}</span><span>${escapeHtml(entry.label)} · ${escapeHtml(entry.type)}</span>`,
+          emptyMessage: "No vendor responses in this filter.",
+          onShowMore: () => {
+            state.vendorResponseVisible += 12;
+            renderVendorResponses(vendor);
+          },
+        });
+      }
+
+      function renderVendorMarketplaceCards(vendor) {
+        renderQuoteCards({
+          targetId: "vendor-marketplace-cards",
+          countId: "vendor-marketplace-count",
+          buttonId: "vendor-marketplace-show-more",
+          entries: getVendorMarketplaceCards(vendor),
+          visible: state.vendorMarketplaceVisible,
+          makeMeta: (entry) =>
+            `<span>${escapeHtml(entry.trading_name)}</span><span>${escapeHtml(entry.label)}</span>`,
+          emptyMessage: "No marketplace comments in this filter.",
+          onShowMore: () => {
+            state.vendorMarketplaceVisible += 12;
+            renderVendorMarketplaceCards(vendor);
+          },
+        });
+      }
+
+      function renderCombinedSection(guest, vendor) {
+        const shortfallWifiCount = guest.filter((entry) =>
+          /signal|wifi|wi-fi|network|card|payment|pay/i.test(entry.shortfalls || ""),
+        ).length;
+
+        const spaceMap = [
+          ["River stage", "space_river_stage"],
+          ["Shanti Wellness", "space_shanti"],
+        ];
+        const spaceReach = Object.fromEntries(
+          spaceMap.map(([label, key]) => [
+            label,
+            (guest.filter((entry) => typeof entry[key] === "number").length / guest.length) * 100,
+          ]),
+        );
+
+        const marketScores = {
+          "Food variety": average(guest.map((entry) => entry.market_food_variety)),
+          "Food quality": average(guest.map((entry) => entry.market_food_quality)),
+          "Stalls variety": average(guest.map((entry) => entry.market_stalls_variety)),
+          "Stalls quality": average(guest.map((entry) => entry.market_stalls_quality)),
+        };
+
+        const combinedThemes = [
+          {
+            badge: "Connectivity",
+            title: "WiFi / connectivity",
+            body: `Guest data: ${fmtPercent((shortfallWifiCount / guest.length) * 100, 0)} cited card, payment, or signal issues in shortfalls. Vendor data: ${vendor.length} of ${vendor.length} said the outage affected trading. Both datasets name the same root cause from different angles.`,
+          },
+          {
+            badge: "Movement",
+            title: "Foot traffic and layout",
+            body: `Guest reach skewed toward music-heavy zones: River stage hit ${fmtPercent(spaceReach["River stage"], 0)} while Shanti Wellness reached ${fmtPercent(spaceReach["Shanti Wellness"], 0)}. Vendor location averaged ${fmtNumber(average(vendor.map((entry) => entry.rating_location)), 2)} / 5. Guests wandered toward music. Vendors at the bottom of the field felt it.`,
+          },
+          {
+            badge: "Commerce",
+            title: "The market experience",
+            body: `Guest market scores all stayed above ${fmtNumber(Math.min(...Object.values(marketScores)), 2)}. At the same time, ${vendor.filter((entry) => parseMultiSelect(entry.improvements_2027).includes("Better foot traffic past stalls")).length} of ${vendor.length} vendors selected better foot traffic for 2027. Guests rated the market well overall. Vendors know it could have been busier.`,
+          },
+        ];
+
+        document.getElementById("combined-themes").innerHTML = combinedThemes
+          .map(
+            (theme) => `
+              <article class="callout-card">
+                <span class="badge">${theme.badge}</span>
+                <strong>${theme.title}</strong>
+                <p>${theme.body}</p>
+              </article>
+            `,
+          )
+          .join("");
+
+        const missedPurchaseShare =
+          ((guest.filter((entry) => entry.missed_purchase && entry.missed_purchase !== "No").length / guest.length) *
+            100);
+        const guestPositivePrebrowse =
+          guest.filter((entry) =>
+            ["Yes - I'd definitely use that", "Probably - sounds handy"].includes(entry.prebrowse_interest),
+          ).length;
+        const activeMarketplaceVendors = vendor.filter((entry) =>
+          ["Very interested - I'd want to be involved from the start", "Interested - tell me more"].includes(
+            entry.marketplace_interest,
+          ),
+        ).length;
+        const openMarketplaceVendors = vendor.filter(
+          (entry) => entry.marketplace_interest === "Not sure - depends on how it works",
+        ).length;
+
+        document.getElementById("combined-marketplace-signals").innerHTML = `
+          <article class="signal-card">
+            <span class="badge">Guest demand</span>
+            <strong>${fmtPercent(missedPurchaseShare, 0)} missed a purchase</strong>
+            <p>${fmtPercent((guestPositivePrebrowse / guest.length) * 100, 0)} showed positive interest in pre-browsing vendors before arrival.</p>
+          </article>
+          <article class="signal-card">
+            <span class="badge">Vendor supply</span>
+            <strong>${activeMarketplaceVendors} of ${vendor.length} actively interested</strong>
+            <p>${openMarketplaceVendors} more are open to it but need detail on how it would work.</p>
+          </article>
+        `;
+
+        document.getElementById("combined-marketplace-note").textContent =
+          "Demand exists on both sides. The most reluctant responses are concentrated among food vendors, which is the expected constraint for pre-order logistics.";
+
+        const guestReturnOrder = [
+          "Definitely - already planning it",
+          "Very likely",
+          "Probably",
+          "Not sure",
+          "Unlikely",
+        ];
+        const guestReturnCounts = countBy(guest, (entry) => entry.return_intent, guestReturnOrder);
+        makeStackedSingleBar(
+          "combined-guest-return-chart",
+          guestReturnOrder,
+          guestReturnCounts,
+          categoryColors.guestReturn,
+        );
+        document.getElementById("combined-guest-return-summary").textContent =
+          `${guestReturnCounts.get("Definitely - already planning it") || 0} definite returns from guests.`;
+
+        const vendorReturnOrder = [
+          "Yes, definitely",
+          "Probably - depends on the details",
+          "Unlikely",
+        ];
+        const vendorReturnCounts = countBy(vendor, (entry) => entry.return_intent, vendorReturnOrder);
+        makeStackedSingleBar(
+          "combined-vendor-return-chart",
+          vendorReturnOrder,
+          vendorReturnCounts,
+          categoryColors.vendorReturn,
+        );
+        document.getElementById("combined-vendor-return-summary").textContent =
+          `${vendorReturnCounts.get("Yes, definitely") || 0} definite returns from vendors.`;
+      }
+
+      function renderHero(guest, vendor) {
+        const facilityMap = [
+          ["Toilets availability", "facility_toilets_availability"],
+          ["Toilets cleanliness", "facility_toilets_cleanliness"],
+          ["Showers", "facility_showers"],
+          ["Water stations", "facility_water"],
+          ["Glamping", "facility_glamping"],
+          ["Parking", "facility_parking"],
+        ];
+        const bestFacility = facilityMap
+          .map(([label, key]) => ({ label, score: average(guest.map((entry) => entry[key])) }))
+          .sort((a, b) => b.score - a.score)[0];
+        const weakestVendorDimension = [
+          ["Location", average(vendor.map((entry) => entry.rating_location))],
+          ["Infrastructure", average(vendor.map((entry) => entry.rating_infrastructure))],
+          ["Support", average(vendor.map((entry) => entry.rating_support))],
+        ].sort((a, b) => a[1] - b[1])[0];
+
+        document.getElementById("hero-guest-highlight").textContent =
+          `${bestFacility.label} · ${fmtNumber(bestFacility.score, 2)} / 5`;
+        document.getElementById("hero-vendor-highlight").textContent =
+          `${weakestVendorDimension[0]} · ${fmtNumber(weakestVendorDimension[1], 2)} / 5`;
+        document.getElementById("hero-combined-highlight").textContent = "Connectivity, layout, conversion";
+      }
+
+      function setupTabs() {
+        document.querySelectorAll(".tab-button").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.activeTab = button.dataset.tab;
+            renderTabs();
+          });
+        });
+      }
+
+      async function init() {
+        try {
+          const [guestResponse, vendorResponse] = await Promise.all([
+            fetch("./data/guest_clean.json"),
+            fetch("./data/vendor_clean.json"),
+          ]);
+          const [guest, vendor] = await Promise.all([
+            guestResponse.json(),
+            vendorResponse.json(),
+          ]);
+
+          renderHero(guest, vendor);
+          renderGuestSection(guest);
+          renderVendorSection(vendor);
+          renderCombinedSection(guest, vendor);
+          setupTabs();
+          renderTabs();
+        } catch (error) {
+          document.querySelector("main").innerHTML = `
+            <section class="readme-note">
+              <h1>Dashboard failed to load</h1>
+              <p class="fallback-copy">The JSON files could not be fetched. Serve this folder from a static web server so <code>fetch()</code> can load the local data files.</p>
+            </section>
+          `;
+          console.error(error);
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>

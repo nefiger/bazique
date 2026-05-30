@@ -1,0 +1,6 @@
+*.xlsx
+__pycache__/
+.DS_Store
+scripts/
+data/redactions.json
+Bazique_2026_Dashboard_Spec.md
