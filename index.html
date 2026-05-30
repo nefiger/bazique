@@ -89,7 +89,10 @@
             <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
             <p class="subview-help" id="guest-subview-help"></p>
           </div>
-          <div class="insights-strip" id="guest-insights" aria-label="Guest slice insights"></div>
+          <div class="insights-bar" aria-label="Guest slice insights">
+            <span class="insights-label">Insights</span>
+            <div class="insights-strip" id="guest-insights"></div>
+          </div>
         </section>
 
         <section class="subview-panel" data-panel-group="guest" data-subview-panel="overview">
@@ -1407,31 +1410,26 @@
 
         document.getElementById("guest-insights").innerHTML = `
           <article class="insight-card">
-            <span class="insight-kicker">Top-line</span>
             <strong>${fiveStarCount} guests gave Bazique a full 5 stars.</strong>
-            <p>${guest.length ? fmtPercent((fiveStarCount / guest.length) * 100, 0) : "0%"} of the current slice rated the festival at the top mark.</p>
+            <span>${guest.length ? fmtPercent((fiveStarCount / guest.length) * 100, 0) : "0%"} of this slice.</span>
           </article>
           <article class="insight-card">
-            <span class="insight-kicker">At-risk returners</span>
             <strong>${atRisk.length} guests are unsure or unlikely to return.</strong>
-            <p>They rate layout at ${fmtNumber(atRiskLayout, 2)} / 5 versus ${fmtNumber(likelyLayout, 2)} among likely returners.</p>
+            <span>Layout falls to ${fmtNumber(atRiskLayout, 2)} / 5 vs ${fmtNumber(likelyLayout, 2)} for likely returners.</span>
           </article>
           <article class="insight-card">
-            <span class="insight-kicker">Programme vs environment</span>
             <strong>Music holds up better than the environment for softer-return guests.</strong>
-            <p>At-risk guests still rate music ${fmtNumber(atRiskMusic, 2)} / 5, suggesting the drag is operational rather than artistic.</p>
+            <span>At-risk guests still rate music ${fmtNumber(atRiskMusic, 2)} / 5.</span>
           </article>
           <article class="insight-card">
-            <span class="insight-kicker">Guest ↔ vendor overlap</span>
             <strong>${softReturn.length ? fmtPercent((softMissed / softReturn.length) * 100, 0) : "0%"} of softer-return guests missed a purchase.</strong>
-            <p>Likely returners sit at ${likely.length ? fmtPercent((likelyMissed / likely.length) * 100, 0) : "0%"}. Vendors also score location just ${fmtNumber(vendorLocation, 2)} / 5 while support stays strong at ${fmtNumber(vendorSupport, 2)}.</p>
+            <span>Likely returners sit at ${likely.length ? fmtPercent((likelyMissed / likely.length) * 100, 0) : "0%"}; vendor location is ${fmtNumber(vendorLocation, 2)} / 5.</span>
           </article>
           ${
             topTheme
               ? `<article class="insight-card">
-            <span class="insight-kicker">Dominant theme</span>
             <strong>${topTheme[0]} leads the narrative in this slice.</strong>
-            <p>${guest.length ? fmtPercent((topTheme[1] / guest.length) * 100, 0) : "0%"} of the active guest slice mentions it across open-text responses.</p>
+            <span>${guest.length ? fmtPercent((topTheme[1] / guest.length) * 100, 0) : "0%"} mention it in open text.</span>
           </article>`
               : ""
           }
