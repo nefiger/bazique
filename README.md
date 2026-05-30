@@ -2,7 +2,7 @@
 
 Static dashboard for Bazique 2026 post-event feedback across guest and vendor surveys.
 
-Live URL: pending GitHub Pages deployment
+Live URL: https://nefiger.github.io/bazique/
 
 ## Data
 
