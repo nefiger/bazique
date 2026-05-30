@@ -83,7 +83,7 @@
               <span class="control-kicker">Current slice</span>
               <strong id="guest-slice-summary">All guest responses</strong>
             </div>
-            <div class="top-signal-row">
+            <div class="top-signal-row top-signal-row--micro">
               <span class="signal-pill" id="hero-guest-highlight">Awaiting data</span>
               <span class="signal-pill" id="hero-vendor-highlight">Awaiting data</span>
               <span class="signal-pill" id="hero-combined-highlight">Awaiting data</span>
@@ -94,118 +94,136 @@
         </section>
 
         <section class="subview-panel" data-panel-group="guest" data-subview-panel="overview">
-        <section class="workbench-grid">
-          <article class="compact-panel compact-panel--metrics">
-            <div class="panel-head">
-              <h2>Guest slice profile</h2>
-              <p>Headline metrics for the active filtered subset.</p>
-            </div>
-            <div class="mini-metrics-grid" id="guest-metrics"></div>
-          </article>
+          <section class="overview-ribbon">
+            <div class="metric-ribbon" id="guest-metrics"></div>
+            <div class="headline-strip">
+              <article class="headline-module">
+                <div class="panel-head panel-head--tight">
+                  <h3>Theme mix</h3>
+                  <p>How the active slice talks.</p>
+                </div>
+                <div class="chart-wrap ribbon">
+                  <canvas id="guest-theme-chart" aria-label="Guest semantic theme mix"></canvas>
+                </div>
+              </article>
 
-          <article class="compact-panel">
-            <div class="panel-head">
-              <h3>Theme mix</h3>
-              <p>Semantic distribution of comments in the current slice.</p>
+              <article class="headline-module">
+                <div class="panel-head panel-head--tight">
+                  <h3>Commerce overlap</h3>
+                  <p>Missed sales cross-read against browse appetite.</p>
+                </div>
+                <div class="chart-wrap ribbon">
+                  <canvas id="guest-commerce-overlap-chart" aria-label="Guest commerce overlap"></canvas>
+                </div>
+              </article>
             </div>
-            <div class="chart-wrap compact">
-              <canvas id="guest-theme-chart" aria-label="Guest semantic theme mix"></canvas>
-            </div>
-          </article>
+          </section>
 
-          <article class="compact-panel">
-            <div class="panel-head">
-              <h3>Commerce overlap</h3>
-              <p>Missed purchases cross-read against browse appetite.</p>
-            </div>
-            <div class="chart-wrap compact">
-              <canvas id="guest-commerce-overlap-chart" aria-label="Guest commerce overlap"></canvas>
-            </div>
-          </article>
-        </section>
+          <section class="story-stack">
+            <div class="story-group">
+              <div class="story-head">
+                <h3>Sentiment and loyalty</h3>
+                <p>Top-line guest satisfaction and whether it translates into a return.</p>
+              </div>
+              <div class="chart-grid two-col">
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">Overall rating distribution</h3>
+                  </div>
+                  <p class="chart-caption" id="guest-overall-summary"></p>
+                  <div class="chart-wrap compact">
+                    <canvas id="guest-overall-chart" aria-label="Guest overall rating distribution"></canvas>
+                  </div>
+                </article>
 
-        <div class="chart-grid two-col">
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">Overall rating distribution</h3>
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">Return intent for 2027</h3>
+                  </div>
+                  <p class="chart-caption" id="guest-return-summary"></p>
+                  <div class="chart-wrap compact">
+                    <canvas id="guest-return-chart" aria-label="Guest return intent for 2027"></canvas>
+                  </div>
+                </article>
+              </div>
             </div>
-            <p class="chart-caption" id="guest-overall-summary"></p>
-            <div class="chart-wrap compact">
-              <canvas id="guest-overall-chart" aria-label="Guest overall rating distribution"></canvas>
-            </div>
-          </article>
 
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">Return intent for 2027</h3>
-            </div>
-            <p class="chart-caption" id="guest-return-summary"></p>
-            <div class="chart-wrap compact">
-              <canvas id="guest-return-chart" aria-label="Guest return intent for 2027"></canvas>
-            </div>
-          </article>
-        </div>
+            <div class="story-group">
+              <div class="story-head">
+                <h3>Operational experience</h3>
+                <p>The quality of facilities, market offer, and site navigation.</p>
+              </div>
+              <div class="chart-grid two-col">
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">Facilities ratings</h3>
+                  </div>
+                  <p class="chart-caption" id="guest-facilities-summary"></p>
+                  <div class="chart-wrap">
+                    <canvas id="guest-facilities-chart" aria-label="Guest ratings for festival facilities"></canvas>
+                  </div>
+                </article>
 
-        <div class="chart-grid two-col">
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">Facilities ratings</h3>
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">Market ratings</h3>
+                  </div>
+                  <p class="chart-caption" id="guest-market-summary"></p>
+                  <div class="chart-wrap">
+                    <canvas id="guest-market-chart" aria-label="Guest ratings for the market"></canvas>
+                  </div>
+                </article>
+              </div>
             </div>
-            <p class="chart-caption" id="guest-facilities-summary"></p>
-            <div class="chart-wrap">
-              <canvas id="guest-facilities-chart" aria-label="Guest ratings for festival facilities"></canvas>
-            </div>
-          </article>
 
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">Market ratings</h3>
-            </div>
-            <p class="chart-caption" id="guest-market-summary"></p>
-            <div class="chart-wrap">
-              <canvas id="guest-market-chart" aria-label="Guest ratings for the market"></canvas>
-            </div>
-          </article>
-        </div>
+            <div class="story-group">
+              <div class="story-head">
+                <h3>Movement through the site</h3>
+                <p>Which spaces got traffic, and how well the visited ones performed.</p>
+              </div>
+              <div class="chart-grid two-col">
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">Space visit reach</h3>
+                  </div>
+                  <p class="chart-caption" id="guest-space-reach-summary"></p>
+                  <div class="chart-wrap">
+                    <canvas id="guest-space-reach-chart" aria-label="Guest visit reach by space"></canvas>
+                  </div>
+                </article>
 
-        <div class="chart-grid two-col">
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">Space visit reach</h3>
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">Space ratings</h3>
+                  </div>
+                  <p class="chart-caption" id="guest-space-rating-summary"></p>
+                  <div class="chart-wrap">
+                    <canvas id="guest-space-rating-chart" aria-label="Guest ratings by space"></canvas>
+                  </div>
+                </article>
+              </div>
             </div>
-            <p class="chart-caption" id="guest-space-reach-summary"></p>
-            <div class="chart-wrap">
-              <canvas id="guest-space-reach-chart" aria-label="Guest visit reach by space"></canvas>
-            </div>
-          </article>
 
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">Space ratings</h3>
+            <div class="story-group">
+              <div class="story-head">
+                <h3>What would improve 2027?</h3>
+                <p>The strongest operational requests in the current guest slice.</p>
+              </div>
+              <article class="chart-card chart-card--tight">
+                <p class="chart-caption" id="guest-improvements-summary"></p>
+                <div class="chart-wrap">
+                  <canvas id="guest-improvements-chart" aria-label="Guest improvement ideas for 2027"></canvas>
+                </div>
+              </article>
             </div>
-            <p class="chart-caption" id="guest-space-rating-summary"></p>
-            <div class="chart-wrap">
-              <canvas id="guest-space-rating-chart" aria-label="Guest ratings by space"></canvas>
-            </div>
-          </article>
-        </div>
-
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">What would make 2027 better?</h3>
-          </div>
-          <p class="chart-caption" id="guest-improvements-summary"></p>
-          <div class="chart-wrap">
-            <canvas id="guest-improvements-chart" aria-label="Guest improvement ideas for 2027"></canvas>
-          </div>
-        </article>
+          </section>
         </section>
 
         <section class="section-block subview-panel" data-panel-group="guest" data-subview-panel="narrative" hidden>
           <div class="section-head">
-            <h3>Quote explorer</h3>
+            <h3>Comment browser</h3>
             <p>
-              Dense narrative browser with question grouping and semantic tags.
+              Stay in the active slice, then step through grouped comments by theme and prompt.
             </p>
           </div>
 
@@ -214,8 +232,7 @@
             <p class="microcopy" id="guest-quote-count"></p>
           </div>
 
-          <div class="quotes-grid quotes-grid--dense" id="guest-quotes"></div>
-          <button class="show-more" id="guest-show-more" type="button">Show more guest quotes</button>
+          <div class="comment-browser" id="guest-quotes"></div>
         </section>
 
         <section class="subsection-card subview-panel" data-panel-group="guest" data-subview-panel="marketplace" hidden>
@@ -274,92 +291,103 @@
       >
         <section class="control-bar">
           <div class="control-summary">
-            <span class="control-kicker">Current slice</span>
-            <strong id="vendor-slice-summary">All vendor responses</strong>
+            <div class="control-summary-copy">
+              <span class="control-kicker">Current slice</span>
+              <strong id="vendor-slice-summary">All vendor responses</strong>
+            </div>
           </div>
           <div class="control-grid" id="vendor-controls"></div>
           <div class="subview-tabs" id="vendor-subviews" aria-label="Vendor subviews"></div>
         </section>
 
         <section class="subview-panel" data-panel-group="vendor" data-subview-panel="overview">
-        <section class="workbench-grid">
-          <article class="compact-panel compact-panel--metrics">
-            <div class="panel-head">
-              <h2>Vendor slice profile</h2>
-              <p>How the active subset changes the trading picture.</p>
-            </div>
-            <div class="mini-metrics-grid" id="vendor-metrics"></div>
-          </article>
+          <section class="overview-ribbon">
+            <div class="metric-ribbon" id="vendor-metrics"></div>
+            <div class="headline-strip">
+              <article class="headline-module">
+                <div class="panel-head panel-head--tight">
+                  <h3>Operational theme mix</h3>
+                  <p>What the active subset is struggling with.</p>
+                </div>
+                <div class="chart-wrap ribbon">
+                  <canvas id="vendor-theme-chart" aria-label="Vendor semantic theme mix"></canvas>
+                </div>
+              </article>
 
-          <article class="compact-panel">
-            <div class="panel-head">
-              <h3>Operational theme mix</h3>
-              <p>Tagged vendor concerns in the current subset.</p>
+              <article class="headline-module">
+                <div class="panel-head panel-head--tight">
+                  <h3>Type x marketplace appetite</h3>
+                  <p>Food and non-food vendors compared side by side.</p>
+                </div>
+                <div class="chart-wrap ribbon">
+                  <canvas id="vendor-type-marketplace-chart" aria-label="Vendor type by marketplace interest"></canvas>
+                </div>
+              </article>
             </div>
-            <div class="chart-wrap compact">
-              <canvas id="vendor-theme-chart" aria-label="Vendor semantic theme mix"></canvas>
-            </div>
-          </article>
+          </section>
 
-          <article class="compact-panel">
-            <div class="panel-head">
-              <h3>Type x marketplace appetite</h3>
-              <p>Food and non-food vendors compared on marketplace participation.</p>
+          <section class="story-stack">
+            <div class="story-group">
+              <div class="story-head">
+                <h3>Operational core</h3>
+                <p>The highest and lowest scoring parts of the vendor experience.</p>
+              </div>
+              <article class="chart-card chart-card--tight">
+                <p class="chart-caption" id="vendor-rating-summary"></p>
+                <div class="chart-wrap">
+                  <canvas id="vendor-ratings-chart" aria-label="Vendor ratings across communication, support, infrastructure, admin, and location"></canvas>
+                </div>
+              </article>
             </div>
-            <div class="chart-wrap compact">
-              <canvas id="vendor-type-marketplace-chart" aria-label="Vendor type by marketplace interest"></canvas>
-            </div>
-          </article>
-        </section>
 
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Core vendor ratings</h3>
-          </div>
-          <p class="chart-caption" id="vendor-rating-summary"></p>
-          <div class="chart-wrap">
-            <canvas id="vendor-ratings-chart" aria-label="Vendor ratings across communication, support, infrastructure, admin, and location"></canvas>
-          </div>
-        </article>
+            <div class="story-group">
+              <div class="story-head">
+                <h3>Pressure on trade</h3>
+                <p>Connectivity friction and whether vendors still plan to return.</p>
+              </div>
+              <div class="chart-grid two-col">
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">WiFi impact</h3>
+                  </div>
+                  <p class="chart-caption" id="vendor-wifi-summary"></p>
+                  <div class="chart-wrap compact">
+                    <canvas id="vendor-wifi-chart" aria-label="Vendor WiFi outage impact"></canvas>
+                  </div>
+                </article>
 
-        <div class="chart-grid two-col">
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">WiFi impact</h3>
+                <article class="chart-card chart-card--tight">
+                  <div class="chart-head">
+                    <h3 class="chart-title">Return to 2027</h3>
+                  </div>
+                  <p class="chart-caption" id="vendor-return-summary"></p>
+                  <div class="chart-wrap compact">
+                    <canvas id="vendor-return-chart" aria-label="Vendor return intent for 2027"></canvas>
+                  </div>
+                </article>
+              </div>
             </div>
-            <p class="chart-caption" id="vendor-wifi-summary"></p>
-            <div class="chart-wrap compact">
-              <canvas id="vendor-wifi-chart" aria-label="Vendor WiFi outage impact"></canvas>
-            </div>
-          </article>
 
-          <article class="chart-card">
-            <div class="chart-head">
-              <h3 class="chart-title">Return to 2027</h3>
+            <div class="story-group">
+              <div class="story-head">
+                <h3>Vendor asks for 2027</h3>
+                <p>The strongest improvement requests inside the current vendor slice.</p>
+              </div>
+              <article class="chart-card chart-card--tight">
+                <p class="chart-caption" id="vendor-improvements-summary"></p>
+                <div class="chart-wrap">
+                  <canvas id="vendor-improvements-chart" aria-label="Vendor improvement requests for 2027"></canvas>
+                </div>
+              </article>
             </div>
-            <p class="chart-caption" id="vendor-return-summary"></p>
-            <div class="chart-wrap compact">
-              <canvas id="vendor-return-chart" aria-label="Vendor return intent for 2027"></canvas>
-            </div>
-          </article>
-        </div>
-
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">What would improve Bazique 2027 for vendors?</h3>
-          </div>
-          <p class="chart-caption" id="vendor-improvements-summary"></p>
-          <div class="chart-wrap">
-            <canvas id="vendor-improvements-chart" aria-label="Vendor improvement requests for 2027"></canvas>
-          </div>
-        </article>
+          </section>
         </section>
 
         <section class="section-block subview-panel" data-panel-group="vendor" data-subview-panel="narrative" hidden>
           <div class="section-head">
-            <h3>Vendor response explorer</h3>
+            <h3>Vendor comment browser</h3>
             <p>
-              Dense vendor narrative browser with semantic tags.
+              Review grouped responses without leaving the active filtered trading slice.
             </p>
           </div>
 
@@ -369,8 +397,7 @@
             <p class="microcopy" id="vendor-response-count"></p>
           </div>
 
-          <div class="quotes-grid quotes-grid--dense" id="vendor-responses"></div>
-          <button class="show-more" id="vendor-show-more" type="button">Show more vendor responses</button>
+          <div class="comment-browser" id="vendor-responses"></div>
         </section>
 
         <section class="subsection-card subview-panel" data-panel-group="vendor" data-subview-panel="marketplace" hidden>
@@ -536,13 +563,11 @@
         guestCommerceFilter: "all",
         guestThemeFilter: "all",
         guestQuoteFilter: "all",
-        guestQuoteVisible: 12,
         vendorWifiFilter: "all",
         vendorInterestFilter: "all",
         vendorResponseFilter: "all",
         vendorTypeFilter: "all",
         vendorThemeFilter: "all",
-        vendorResponseVisible: 12,
         vendorMarketplaceFilter: "all",
         vendorMarketplaceVisible: 12,
       };
@@ -891,6 +916,86 @@
         button.onclick = onShowMore;
       }
 
+      function summarizeText(value, max = 148) {
+        if (value.length <= max) {
+          return value;
+        }
+        return `${value.slice(0, max).trimEnd()}...`;
+      }
+
+      function buildCommentGroups(entries) {
+        const groups = new Map();
+        entries.forEach((entry) => {
+          const primaryTheme = (entry.themes && entry.themes[0]) || "General";
+          if (!groups.has(primaryTheme)) {
+            groups.set(primaryTheme, []);
+          }
+          groups.get(primaryTheme).push(entry);
+        });
+        return Array.from(groups.entries())
+          .map(([theme, items]) => ({
+            theme,
+            items: items.sort((a, b) => a.label.localeCompare(b.label) || a.text.localeCompare(b.text)),
+          }))
+          .sort((a, b) => b.items.length - a.items.length);
+      }
+
+      function renderCommentBrowser({ targetId, countId, entries, emptyMessage, makeContext }) {
+        const target = document.getElementById(targetId);
+        const count = document.getElementById(countId);
+
+        if (!entries.length) {
+          count.textContent = "0 comments in this view";
+          target.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+          return;
+        }
+
+        const groups = buildCommentGroups(entries);
+        count.textContent = `${entries.length} comments across ${groups.length} theme groups`;
+
+        target.innerHTML = groups
+          .map(
+            (group) => `
+              <section class="comment-group">
+                <header class="comment-group-head">
+                  <div class="comment-group-title">
+                    <span class="theme-chip theme-chip--group">${escapeHtml(group.theme)}</span>
+                    <strong>${group.items.length}</strong>
+                  </div>
+                  <span class="microcopy">${group.items.length === 1 ? "1 comment" : `${group.items.length} comments`}</span>
+                </header>
+                <div class="comment-list">
+                  ${group.items
+                    .map(
+                      (entry) => `
+                        <details class="comment-item">
+                          <summary>
+                            <span class="comment-item-meta">
+                              <span class="comment-question">${escapeHtml(entry.label)}</span>
+                              ${makeContext ? `<span class="comment-context">${escapeHtml(makeContext(entry))}</span>` : ""}
+                            </span>
+                            <span class="comment-preview">${escapeHtml(summarizeText(entry.text))}</span>
+                          </summary>
+                          <div class="comment-item-body">
+                            ${entry.themes && entry.themes.length > 1
+                              ? `<div class="theme-chip-row">${entry.themes
+                                  .slice(1)
+                                  .map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`)
+                                  .join("")}</div>`
+                              : ""}
+                            <p>${escapeHtml(entry.text)}</p>
+                          </div>
+                        </details>
+                      `,
+                    )
+                    .join("")}
+                </div>
+              </section>
+            `,
+          )
+          .join("");
+      }
+
       function escapeHtml(value) {
         return value
           .replaceAll("&", "&amp;")
@@ -937,6 +1042,7 @@
               .map((item) => ({
                 label: item.label,
                 text: entry[item.field],
+                themes: detectGuestThemes(entry),
               }))
               .filter((item) => item.text),
           );
@@ -947,6 +1053,7 @@
           .map((entry) => ({
             label: active.label,
             text: entry[active.field],
+            themes: detectGuestThemes(entry),
           }));
       }
 
@@ -966,6 +1073,7 @@
                 type: entry.type,
                 label: item.label,
                 text: entry[item.field],
+                themes: detectVendorThemes(entry),
               }))
               .filter((item) => item.text),
           );
@@ -978,6 +1086,7 @@
             type: entry.type,
             label: active.label,
             text: entry[active.field],
+            themes: detectVendorThemes(entry),
           }));
       }
 
@@ -1117,7 +1226,7 @@
           "guest-subviews",
           [
             { id: "overview", label: "Overview" },
-            { id: "narrative", label: "Narrative" },
+            { id: "narrative", label: "Comments" },
             { id: "marketplace", label: "Marketplace" },
           ],
           state.guestSubview,
@@ -1140,7 +1249,6 @@
             ],
             onChange: (value) => {
               state.guestRatingFilter = value;
-              state.guestQuoteVisible = 12;
               renderDashboard();
             },
           },
@@ -1157,7 +1265,6 @@
             ],
             onChange: (value) => {
               state.guestReturnFilter = value;
-              state.guestQuoteVisible = 12;
               renderDashboard();
             },
           },
@@ -1173,7 +1280,6 @@
             ],
             onChange: (value) => {
               state.guestCommerceFilter = value;
-              state.guestQuoteVisible = 12;
               renderDashboard();
             },
           },
@@ -1190,7 +1296,6 @@
             ],
             onChange: (value) => {
               state.guestThemeFilter = value;
-              state.guestQuoteVisible = 12;
               renderDashboard();
             },
           },
@@ -1468,7 +1573,6 @@
 
         renderFilterButtons("guest-quote-filters", guestQuoteConfig, state.guestQuoteFilter, (id) => {
           state.guestQuoteFilter = id;
-          state.guestQuoteVisible = 12;
           renderGuestQuotes(guest);
         });
         renderGuestQuotes(guest);
@@ -1477,28 +1581,15 @@
       function renderGuestQuotes(guest) {
         renderFilterButtons("guest-quote-filters", guestQuoteConfig, state.guestQuoteFilter, (id) => {
           state.guestQuoteFilter = id;
-          state.guestQuoteVisible = 12;
           renderGuestQuotes(guest);
         });
 
-        const quotes = getGuestQuotes(guest);
-        renderQuoteCards({
+        renderCommentBrowser({
           targetId: "guest-quotes",
           countId: "guest-quote-count",
-          buttonId: "guest-show-more",
-          entries: quotes,
-          visible: state.guestQuoteVisible,
-          makeMeta: (entry) => {
-            const themes = detectGuestThemes({ best_part: entry.text })
-              .map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`)
-              .join("");
-            return `<span>${escapeHtml(entry.label)}</span><span class="theme-chip-row">${themes}</span>`;
-          },
-          emptyMessage: "No guest responses in this filter.",
-          onShowMore: () => {
-            state.guestQuoteVisible += 12;
-            renderGuestQuotes(guest);
-          },
+          entries: getGuestQuotes(guest),
+          emptyMessage: "No guest comments in this filter.",
+          makeContext: () => "Guest response",
         });
       }
 
@@ -1507,7 +1598,7 @@
           "vendor-subviews",
           [
             { id: "overview", label: "Overview" },
-            { id: "narrative", label: "Narrative" },
+            { id: "narrative", label: "Comments" },
             { id: "marketplace", label: "Marketplace" },
           ],
           state.vendorSubview,
@@ -1529,7 +1620,6 @@
             ],
             onChange: (value) => {
               state.vendorTypeFilter = value;
-              state.vendorResponseVisible = 12;
               state.vendorMarketplaceVisible = 12;
               renderDashboard();
             },
@@ -1545,7 +1635,6 @@
             ],
             onChange: (value) => {
               state.vendorWifiFilter = value;
-              state.vendorResponseVisible = 12;
               renderDashboard();
             },
           },
@@ -1561,7 +1650,6 @@
             ],
             onChange: (value) => {
               state.vendorInterestFilter = value;
-              state.vendorResponseVisible = 12;
               state.vendorMarketplaceVisible = 12;
               renderDashboard();
             },
@@ -1579,7 +1667,6 @@
             ],
             onChange: (value) => {
               state.vendorThemeFilter = value;
-              state.vendorResponseVisible = 12;
               state.vendorMarketplaceVisible = 12;
               renderDashboard();
             },
@@ -1762,7 +1849,6 @@
           state.vendorResponseFilter,
           (id) => {
             state.vendorResponseFilter = id;
-            state.vendorResponseVisible = 12;
             renderVendorResponses(vendor);
           },
         );
@@ -1776,7 +1862,6 @@
           state.vendorTypeFilter,
           (id) => {
             state.vendorTypeFilter = id;
-            state.vendorResponseVisible = 12;
             renderDashboard();
           },
         );
@@ -1800,23 +1885,12 @@
       }
 
       function renderVendorResponses(vendor) {
-        renderQuoteCards({
+        renderCommentBrowser({
           targetId: "vendor-responses",
           countId: "vendor-response-count",
-          buttonId: "vendor-show-more",
           entries: getVendorResponses(vendor),
-          visible: state.vendorResponseVisible,
-          makeMeta: (entry) => {
-            const themes = detectVendorThemes({ onsite_feedback: entry.text })
-              .map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`)
-              .join("");
-            return `<span>${escapeHtml(entry.trading_name)}</span><span>${escapeHtml(entry.label)} · ${escapeHtml(entry.type)}</span><span class="theme-chip-row">${themes}</span>`;
-          },
-          emptyMessage: "No vendor responses in this filter.",
-          onShowMore: () => {
-            state.vendorResponseVisible += 12;
-            renderVendorResponses(vendor);
-          },
+          emptyMessage: "No vendor comments in this filter.",
+          makeContext: (entry) => `${entry.trading_name} · ${entry.type}`,
         });
       }
 
@@ -1977,11 +2051,12 @@
           ["Support", average(vendor.map((entry) => entry.rating_support))],
         ].sort((a, b) => a[1] - b[1])[0];
 
-        document.getElementById("hero-guest-highlight").textContent =
-          `${bestFacility.label} · ${fmtNumber(bestFacility.score, 2)} / 5`;
-        document.getElementById("hero-vendor-highlight").textContent =
-          `${weakestVendorDimension[0]} · ${fmtNumber(weakestVendorDimension[1], 2)} / 5`;
-        document.getElementById("hero-combined-highlight").textContent = "Connectivity, layout, conversion";
+        document.getElementById("hero-guest-highlight").innerHTML =
+          `<span class="signal-pill-label">Guest high</span><span>${bestFacility.label} · ${fmtNumber(bestFacility.score, 2)} / 5</span>`;
+        document.getElementById("hero-vendor-highlight").innerHTML =
+          `<span class="signal-pill-label">Vendor low</span><span>${weakestVendorDimension[0]} · ${fmtNumber(weakestVendorDimension[1], 2)} / 5</span>`;
+        document.getElementById("hero-combined-highlight").innerHTML =
+          `<span class="signal-pill-label">Shared theme</span><span>Connectivity, layout, conversion</span>`;
       }
 
       function renderDashboard() {
