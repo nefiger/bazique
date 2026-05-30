@@ -71,22 +71,6 @@
     </header>
 
     <main class="page-shell" id="top">
-      <section class="dashboard-intro">
-        <div class="intro-copy">
-          <p class="eyebrow">Analysis workspace</p>
-          <h1>Bazique 2026 response explorer</h1>
-          <p>
-            Explore slices, overlaps, and narrative themes across guest and vendor
-            feedback without leaving the page.
-          </p>
-        </div>
-        <div class="intro-signals" id="intro-signals">
-          <span class="signal-pill" id="hero-guest-highlight">Awaiting data</span>
-          <span class="signal-pill" id="hero-vendor-highlight">Awaiting data</span>
-          <span class="signal-pill" id="hero-combined-highlight">Awaiting data</span>
-        </div>
-      </section>
-
       <section
         class="tab-panel section-block fade-up delay-2"
         id="panel-guest"
@@ -95,8 +79,15 @@
       >
         <section class="control-bar">
           <div class="control-summary">
-            <span class="control-kicker">Current slice</span>
-            <strong id="guest-slice-summary">All guest responses</strong>
+            <div class="control-summary-copy">
+              <span class="control-kicker">Current slice</span>
+              <strong id="guest-slice-summary">All guest responses</strong>
+            </div>
+            <div class="top-signal-row">
+              <span class="signal-pill" id="hero-guest-highlight">Awaiting data</span>
+              <span class="signal-pill" id="hero-vendor-highlight">Awaiting data</span>
+              <span class="signal-pill" id="hero-combined-highlight">Awaiting data</span>
+            </div>
           </div>
           <div class="control-grid" id="guest-controls"></div>
         </section>
@@ -105,7 +96,7 @@
           <article class="compact-panel compact-panel--metrics">
             <div class="panel-head">
               <h2>Guest slice profile</h2>
-              <p>Compact view of the active filtered subset.</p>
+              <p>Headline metrics for the active filtered subset.</p>
             </div>
             <div class="mini-metrics-grid" id="guest-metrics"></div>
           </article>
