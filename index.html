@@ -95,8 +95,34 @@
 
         <section class="subview-panel" data-panel-group="guest" data-subview-panel="overview">
           <section class="overview-ribbon">
-            <div class="metric-ribbon" id="guest-metrics"></div>
-            <div class="headline-strip">
+            <div class="overview-context">
+              <div class="story-head story-head--compact">
+                <h3>Current guest slice context</h3>
+                <p>These support metrics frame the filtered experience charts below.</p>
+              </div>
+              <div class="metric-ribbon metric-ribbon--compact" id="guest-metrics"></div>
+            </div>
+            <div class="headline-grid">
+              <article class="headline-module">
+                <div class="panel-head panel-head--tight">
+                  <h3>Overall rating distribution</h3>
+                  <p id="guest-overall-summary"></p>
+                </div>
+                <div class="chart-wrap ribbon">
+                  <canvas id="guest-overall-chart" aria-label="Guest overall rating distribution"></canvas>
+                </div>
+              </article>
+
+              <article class="headline-module">
+                <div class="panel-head panel-head--tight">
+                  <h3>Return intent for 2027</h3>
+                  <p id="guest-return-summary"></p>
+                </div>
+                <div class="chart-wrap ribbon">
+                  <canvas id="guest-return-chart" aria-label="Guest return intent for 2027"></canvas>
+                </div>
+              </article>
+
               <article class="headline-module">
                 <div class="panel-head panel-head--tight">
                   <h3>Theme mix</h3>
@@ -120,34 +146,6 @@
           </section>
 
           <section class="story-stack">
-            <div class="story-group">
-              <div class="story-head">
-                <h3>Sentiment and loyalty</h3>
-                <p>Top-line guest satisfaction and whether it translates into a return.</p>
-              </div>
-              <div class="chart-grid two-col">
-                <article class="chart-card chart-card--tight">
-                  <div class="chart-head">
-                    <h3 class="chart-title">Overall rating distribution</h3>
-                  </div>
-                  <p class="chart-caption" id="guest-overall-summary"></p>
-                  <div class="chart-wrap compact">
-                    <canvas id="guest-overall-chart" aria-label="Guest overall rating distribution"></canvas>
-                  </div>
-                </article>
-
-                <article class="chart-card chart-card--tight">
-                  <div class="chart-head">
-                    <h3 class="chart-title">Return intent for 2027</h3>
-                  </div>
-                  <p class="chart-caption" id="guest-return-summary"></p>
-                  <div class="chart-wrap compact">
-                    <canvas id="guest-return-chart" aria-label="Guest return intent for 2027"></canvas>
-                  </div>
-                </article>
-              </div>
-            </div>
-
             <div class="story-group">
               <div class="story-head">
                 <h3>Operational experience</h3>

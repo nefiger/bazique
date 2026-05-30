@@ -302,9 +302,20 @@ select {
   gap: 8px;
 }
 
+.overview-context {
+  display: grid;
+  gap: 6px;
+}
+
 .headline-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.headline-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -623,6 +634,14 @@ select {
   font-size: 0.74rem;
 }
 
+.story-head--compact h3 {
+  font-size: 0.82rem;
+}
+
+.story-head--compact p {
+  font-size: 0.7rem;
+}
+
 .metric-ribbon .metric-card {
   padding: 8px 10px;
   gap: 3px;
@@ -631,6 +650,24 @@ select {
 
 .metric-ribbon .metric-value {
   font-size: clamp(1rem, 1.4vw, 1.28rem);
+}
+
+.metric-ribbon--compact .metric-card {
+  padding: 7px 9px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.metric-ribbon--compact .metric-label {
+  font-size: 0.66rem;
+}
+
+.metric-ribbon--compact .metric-value {
+  font-size: clamp(0.92rem, 1.15vw, 1.12rem);
+}
+
+.metric-ribbon--compact .metric-note,
+.metric-ribbon--compact .metric-subnote {
+  font-size: 0.66rem;
 }
 
 .comment-browser {
@@ -898,6 +935,7 @@ select {
   .control-grid,
   .mini-metrics-grid,
   .metric-ribbon,
+  .headline-grid,
   .headline-strip,
   .chart-grid.two-col,
   .quotes-grid,
