@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="./assets/style.css" />
     <script
       defer
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
@@ -93,15 +93,15 @@
             <div class="insight-list">
               <div class="insight-item">
                 <span class="insight-label">Strongest guest score</span>
-                <span class="insight-value" id="hero-guest-highlight">Loading...</span>
+                <span class="insight-value" id="hero-guest-highlight">Awaiting data</span>
               </div>
               <div class="insight-item">
                 <span class="insight-label">Biggest vendor friction</span>
-                <span class="insight-value" id="hero-vendor-highlight">Loading...</span>
+                <span class="insight-value" id="hero-vendor-highlight">Awaiting data</span>
               </div>
               <div class="insight-item">
                 <span class="insight-label">Shared planning theme</span>
-                <span class="insight-value" id="hero-combined-highlight">Loading...</span>
+                <span class="insight-value" id="hero-combined-highlight">Awaiting data</span>
               </div>
             </div>
           </aside>
@@ -495,6 +495,7 @@
       ];
 
       const charts = new Map();
+      let chartsEnabled = true;
 
       const state = {
         activeTab: "guest",
@@ -664,6 +665,19 @@
       }
 
       function createChart(id, config) {
+        if (!window.Chart) {
+          chartsEnabled = false;
+          const canvas = document.getElementById(id);
+          if (canvas && canvas.parentElement && !canvas.parentElement.dataset.chartFallback) {
+            canvas.parentElement.dataset.chartFallback = "true";
+            canvas.hidden = true;
+            const fallback = document.createElement("p");
+            fallback.className = "fallback-copy";
+            fallback.textContent = "Chart unavailable in this browser session. The underlying dashboard data is still loaded below.";
+            canvas.parentElement.appendChild(fallback);
+          }
+          return null;
+        }
         destroyChart(id);
         const canvas = document.getElementById(id);
         const context = canvas.getContext("2d");
@@ -1476,6 +1490,9 @@
             fetch("./data/guest_clean.json"),
             fetch("./data/vendor_clean.json"),
           ]);
+          if (!guestResponse.ok || !vendorResponse.ok) {
+            throw new Error(`Dashboard data request failed (${guestResponse.status}/${vendorResponse.status}).`);
+          }
           const [guest, vendor] = await Promise.all([
             guestResponse.json(),
             vendorResponse.json(),
@@ -1485,6 +1502,9 @@
           renderGuestSection(guest);
           renderVendorSection(vendor);
           renderCombinedSection(guest, vendor);
+          if (!chartsEnabled) {
+            document.getElementById("hero-combined-highlight").textContent = "Data loaded, charts unavailable";
+          }
           setupTabs();
           renderTabs();
         } catch (error) {
@@ -1498,18 +1518,7 @@
         }
       }
 
-      async function waitForChart(maxAttempts = 60) {
-        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-          if (window.Chart) {
-            return;
-          }
-          await new Promise((resolve) => window.setTimeout(resolve, 100));
-        }
-        throw new Error("Chart.js did not finish loading before the dashboard initialised.");
-      }
-
-      window.addEventListener("load", async () => {
-        await waitForChart();
+      window.addEventListener("DOMContentLoaded", async () => {
         await init();
       });
     </script>
