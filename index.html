@@ -75,16 +75,15 @@
         <div class="hero-banner">
           <article class="hero-panel fade-up">
             <p class="eyebrow">Post-event review snapshot</p>
-            <h1>Music, art, absurdism and the operational truth underneath it.</h1>
+            <h1>Bazique 2026 feedback dashboard.</h1>
             <p>
-              Guest experience, vendor experience, and the cross-dataset friction points
-              are all explorable here. The dashboard stays static and public-safe, but it
-              should still feel like Bazique rather than a generic reporting shell.
+              Compact analysis view for guest experience, vendor trading conditions, and
+              the shared operational pressure points between them.
             </p>
             <div class="hero-tags">
               <span class="pill">102 cleaned guest responses</span>
               <span class="pill">11 vendor responses</span>
-              <span class="pill">Static GitHub Pages build</span>
+              <span class="pill">Interactive static dashboard</span>
             </div>
           </article>
 
@@ -121,6 +120,14 @@
             scores.
           </p>
         </div>
+
+        <section class="control-bar">
+          <div class="control-summary">
+            <span class="control-kicker">Current slice</span>
+            <strong id="guest-slice-summary">All guest responses</strong>
+          </div>
+          <div class="control-grid" id="guest-controls"></div>
+        </section>
 
         <div class="metrics-grid" id="guest-metrics"></div>
 
@@ -279,6 +286,14 @@
             experience split across food and non-food traders.
           </p>
         </div>
+
+        <section class="control-bar">
+          <div class="control-summary">
+            <span class="control-kicker">Current slice</span>
+            <strong id="vendor-slice-summary">All vendor responses</strong>
+          </div>
+          <div class="control-grid" id="vendor-controls"></div>
+        </section>
 
         <div class="metrics-grid" id="vendor-metrics"></div>
 
@@ -499,10 +514,17 @@
 
       const state = {
         activeTab: "guest",
+        guestRatingFilter: "all",
+        guestReturnFilter: "all",
+        guestPurchaseFilter: "all",
+        guestPrebrowseFilter: "all",
         guestQuoteFilter: "all",
         guestQuoteVisible: 12,
+        vendorWifiFilter: "all",
+        vendorInterestFilter: "all",
         vendorResponseFilter: "all",
         vendorTypeFilter: "all",
+        vendorReturnFilter: "all",
         vendorResponseVisible: 12,
         vendorMarketplaceFilter: "all",
         vendorMarketplaceVisible: 12,
@@ -789,6 +811,30 @@
         });
       }
 
+      function renderSelectControls(targetId, controls) {
+        const target = document.getElementById(targetId);
+        target.innerHTML = "";
+        controls.forEach((control) => {
+          const wrapper = document.createElement("label");
+          wrapper.className = "control-field";
+          wrapper.innerHTML = `<span>${escapeHtml(control.label)}</span>`;
+          const select = document.createElement("select");
+          select.className = "control-select";
+          control.options.forEach((option) => {
+            const element = document.createElement("option");
+            element.value = option.value;
+            element.textContent = option.label;
+            if (option.value === control.value) {
+              element.selected = true;
+            }
+            select.appendChild(element);
+          });
+          select.addEventListener("change", (event) => control.onChange(event.target.value));
+          wrapper.appendChild(select);
+          target.appendChild(wrapper);
+        });
+      }
+
       function renderQuoteCards({
         targetId,
         countId,
@@ -909,7 +955,131 @@
           }));
       }
 
-      function renderGuestSection(guest) {
+      function filterGuestData(guest) {
+        return guest.filter((entry) => {
+          if (state.guestRatingFilter === "high" && entry.overall_rating < 4) {
+            return false;
+          }
+          if (state.guestRatingFilter === "mid" && entry.overall_rating !== 3) {
+            return false;
+          }
+          if (state.guestRatingFilter === "low" && entry.overall_rating !== 2) {
+            return false;
+          }
+          if (
+            state.guestReturnFilter !== "all" &&
+            entry.return_intent !== state.guestReturnFilter
+          ) {
+            return false;
+          }
+          if (
+            state.guestPurchaseFilter !== "all" &&
+            entry.missed_purchase !== state.guestPurchaseFilter
+          ) {
+            return false;
+          }
+          if (
+            state.guestPrebrowseFilter !== "all" &&
+            entry.prebrowse_interest !== state.guestPrebrowseFilter
+          ) {
+            return false;
+          }
+          return true;
+        });
+      }
+
+      function filterVendorData(vendor) {
+        return vendor.filter((entry) => {
+          if (state.vendorTypeFilter !== "all" && entry.type !== state.vendorTypeFilter) {
+            return false;
+          }
+          if (state.vendorWifiFilter !== "all" && entry.wifi_impact !== state.vendorWifiFilter) {
+            return false;
+          }
+          if (
+            state.vendorReturnFilter !== "all" &&
+            entry.return_intent !== state.vendorReturnFilter
+          ) {
+            return false;
+          }
+          if (
+            state.vendorInterestFilter !== "all" &&
+            entry.marketplace_interest !== state.vendorInterestFilter
+          ) {
+            return false;
+          }
+          return true;
+        });
+      }
+
+      function renderGuestSection(guest, guestRaw) {
+        renderSelectControls("guest-controls", [
+          {
+            label: "Overall rating",
+            value: state.guestRatingFilter,
+            options: [
+              { value: "all", label: "All ratings" },
+              { value: "high", label: "4-5 stars" },
+              { value: "mid", label: "3 stars" },
+              { value: "low", label: "2 stars" },
+            ],
+            onChange: (value) => {
+              state.guestRatingFilter = value;
+              state.guestQuoteVisible = 12;
+              renderDashboard();
+            },
+          },
+          {
+            label: "Return intent",
+            value: state.guestReturnFilter,
+            options: [
+              { value: "all", label: "All intent" },
+              { value: "Definitely - already planning it", label: "Definitely" },
+              { value: "Very likely", label: "Very likely" },
+              { value: "Probably", label: "Probably" },
+              { value: "Not sure", label: "Not sure" },
+              { value: "Unlikely", label: "Unlikely" },
+            ],
+            onChange: (value) => {
+              state.guestReturnFilter = value;
+              state.guestQuoteVisible = 12;
+              renderDashboard();
+            },
+          },
+          {
+            label: "Missed purchase",
+            value: state.guestPurchaseFilter,
+            options: [
+              { value: "all", label: "All purchase responses" },
+              { value: "No", label: "No missed purchase" },
+              { value: "Yes, once", label: "Yes, once" },
+              { value: "Yes, more than once", label: "Yes, more than once" },
+            ],
+            onChange: (value) => {
+              state.guestPurchaseFilter = value;
+              state.guestQuoteVisible = 12;
+              renderDashboard();
+            },
+          },
+          {
+            label: "Pre-browse interest",
+            value: state.guestPrebrowseFilter,
+            options: [
+              { value: "all", label: "All pre-browse answers" },
+              { value: "Yes - I'd definitely use that", label: "Definitely use" },
+              { value: "Probably - sounds handy", label: "Probably useful" },
+              { value: "Not really - I enjoy discovering things on the day", label: "Not really" },
+            ],
+            onChange: (value) => {
+              state.guestPrebrowseFilter = value;
+              state.guestQuoteVisible = 12;
+              renderDashboard();
+            },
+          },
+        ]);
+        document.getElementById("guest-slice-summary").textContent =
+          `${guest.length} of ${guestRaw.length} guest responses in view`;
+
         const rated45 = guest.filter((entry) => entry.overall_rating >= 4).length;
         const returnDefinite = guest.filter(
           (entry) => entry.return_intent === "Definitely - already planning it",
@@ -920,16 +1090,16 @@
           {
             label: "Overall rating",
             value: `${fmtNumber(average(guest.map((entry) => entry.overall_rating)), 2)} / 5`,
-            note: "Average across all cleaned guest responses",
+            note: guest.length ? "Average in current slice" : "No responses in current slice",
           },
           {
             label: "Returning in 2027",
-            value: fmtPercent((returnDefinite / guest.length) * 100, 0),
+            value: guest.length ? fmtPercent((returnDefinite / guest.length) * 100, 0) : "0%",
             note: "Definitely already planning it",
           },
           {
             label: "Rated 4 or 5 stars",
-            value: fmtPercent((rated45 / guest.length) * 100, 0),
+            value: guest.length ? fmtPercent((rated45 / guest.length) * 100, 0) : "0%",
             note: `${rated45} of ${guest.length} responses`,
           },
           {
@@ -1023,7 +1193,9 @@
         ];
         const spaceReach = spaceMap.map(([label, key]) => ({
           label,
-          reach: (guest.filter((entry) => typeof entry[key] === "number").length / guest.length) * 100,
+          reach: guest.length
+            ? (guest.filter((entry) => typeof entry[key] === "number").length / guest.length) * 100
+            : 0,
           rating: average(guest.map((entry) => entry[key])),
         }));
         makeBarChart("guest-space-reach-chart", {
@@ -1100,7 +1272,7 @@
           `${fmtPercent(
             (((prebrowseCounts.get("Yes - I'd definitely use that") || 0) +
               (prebrowseCounts.get("Probably - sounds handy") || 0)) /
-              guest.length) *
+              (guest.length || 1)) *
               100,
             0,
           )} showed positive interest in browsing vendors ahead of time.`;
@@ -1145,7 +1317,74 @@
         });
       }
 
-      function renderVendorSection(vendor) {
+      function renderVendorSection(vendor, vendorRaw) {
+        renderSelectControls("vendor-controls", [
+          {
+            label: "Vendor type",
+            value: state.vendorTypeFilter,
+            options: [
+              { value: "all", label: "All vendors" },
+              { value: "Food", label: "Food" },
+              { value: "Non-food", label: "Non-food" },
+            ],
+            onChange: (value) => {
+              state.vendorTypeFilter = value;
+              state.vendorResponseVisible = 12;
+              state.vendorMarketplaceVisible = 12;
+              renderDashboard();
+            },
+          },
+          {
+            label: "WiFi impact",
+            value: state.vendorWifiFilter,
+            options: [
+              { value: "all", label: "All outage impact" },
+              { value: "Yes - it had a significant impact and I wasn't able to recover the lost time", label: "Significant" },
+              { value: "Yes - it was disruptive but I recovered some ground later", label: "Disruptive" },
+              { value: "Somewhat - I found workarounds and managed to keep trading", label: "Somewhat" },
+            ],
+            onChange: (value) => {
+              state.vendorWifiFilter = value;
+              state.vendorResponseVisible = 12;
+              renderDashboard();
+            },
+          },
+          {
+            label: "Return intent",
+            value: state.vendorReturnFilter,
+            options: [
+              { value: "all", label: "All return intent" },
+              { value: "Yes, definitely", label: "Yes" },
+              { value: "Probably - depends on the details", label: "Probably" },
+              { value: "Unlikely", label: "Unlikely" },
+            ],
+            onChange: (value) => {
+              state.vendorReturnFilter = value;
+              state.vendorResponseVisible = 12;
+              renderDashboard();
+            },
+          },
+          {
+            label: "Marketplace interest",
+            value: state.vendorInterestFilter,
+            options: [
+              { value: "all", label: "All marketplace interest" },
+              { value: "Very interested - I'd want to be involved from the start", label: "Very interested" },
+              { value: "Interested - tell me more", label: "Interested" },
+              { value: "Not sure - depends on how it works", label: "Not sure" },
+              { value: "Not for me", label: "Not for me" },
+            ],
+            onChange: (value) => {
+              state.vendorInterestFilter = value;
+              state.vendorResponseVisible = 12;
+              state.vendorMarketplaceVisible = 12;
+              renderDashboard();
+            },
+          },
+        ]);
+        document.getElementById("vendor-slice-summary").textContent =
+          `${vendor.length} of ${vendorRaw.length} vendor responses in view`;
+
         const responseRate = (vendor.length / 31) * 100;
         const commsAvg = average(vendor.map((entry) => entry.rating_comms));
         const adminAvg = average(vendor.map((entry) => entry.rating_admin));
@@ -1276,7 +1515,7 @@
           (id) => {
             state.vendorTypeFilter = id;
             state.vendorResponseVisible = 12;
-            renderVendorResponses(vendor);
+            renderDashboard();
           },
         );
         renderFilterButtons(
@@ -1475,6 +1714,16 @@
         document.getElementById("hero-combined-highlight").textContent = "Connectivity, layout, conversion";
       }
 
+      function renderDashboard() {
+        const guestFiltered = filterGuestData(window.__dashboardData.guest);
+        const vendorFiltered = filterVendorData(window.__dashboardData.vendor);
+
+        renderHero(window.__dashboardData.guest, window.__dashboardData.vendor);
+        renderGuestSection(guestFiltered, window.__dashboardData.guest);
+        renderVendorSection(vendorFiltered, window.__dashboardData.vendor);
+        renderCombinedSection(guestFiltered.length ? guestFiltered : window.__dashboardData.guest, vendorFiltered.length ? vendorFiltered : window.__dashboardData.vendor);
+      }
+
       function setupTabs() {
         document.querySelectorAll(".tab-button").forEach((button) => {
           button.addEventListener("click", () => {
@@ -1497,11 +1746,8 @@
             guestResponse.json(),
             vendorResponse.json(),
           ]);
-
-          renderHero(guest, vendor);
-          renderGuestSection(guest);
-          renderVendorSection(vendor);
-          renderCombinedSection(guest, vendor);
+          window.__dashboardData = { guest, vendor };
+          renderDashboard();
           if (!chartsEnabled) {
             document.getElementById("hero-combined-highlight").textContent = "Data loaded, charts unavailable";
           }
