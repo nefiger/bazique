@@ -85,53 +85,46 @@
             </div>
           </div>
           <div class="control-grid" id="guest-controls"></div>
-          <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
+          <div class="subview-bar">
+            <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
+            <p class="subview-help" id="guest-subview-help"></p>
+          </div>
+          <div class="headline-grid headline-grid--header" id="guest-headline-grid">
+            <article class="headline-module">
+              <div class="panel-head panel-head--tight">
+                <h3>Overall rating distribution</h3>
+                <p id="guest-overall-summary"></p>
+              </div>
+              <div class="headline-body" id="guest-overall-headline"></div>
+            </article>
+
+            <article class="headline-module">
+              <div class="panel-head panel-head--tight">
+                <h3>Return intent for 2027</h3>
+                <p id="guest-return-summary"></p>
+              </div>
+              <div class="headline-body" id="guest-return-headline"></div>
+            </article>
+
+            <article class="headline-module">
+              <div class="panel-head panel-head--tight">
+                <h3>Theme mix</h3>
+                <p>How the active slice talks.</p>
+              </div>
+              <div class="headline-body" id="guest-theme-headline"></div>
+            </article>
+
+            <article class="headline-module">
+              <div class="panel-head panel-head--tight">
+                <h3>Commerce overlap</h3>
+                <p>Missed sales cross-read against browse appetite.</p>
+              </div>
+              <div class="headline-body" id="guest-commerce-headline"></div>
+            </article>
+          </div>
         </section>
 
         <section class="subview-panel" data-panel-group="guest" data-subview-panel="overview">
-          <section class="overview-ribbon">
-            <div class="overview-context">
-              <div class="story-head story-head--compact">
-                <h3>Current guest slice context</h3>
-                <p>These support metrics frame the filtered experience charts below.</p>
-              </div>
-              <div class="metric-ribbon metric-ribbon--compact" id="guest-metrics"></div>
-            </div>
-            <div class="headline-grid">
-              <article class="headline-module">
-                <div class="panel-head panel-head--tight">
-                  <h3>Overall rating distribution</h3>
-                  <p id="guest-overall-summary"></p>
-                </div>
-                <div class="headline-body" id="guest-overall-headline"></div>
-              </article>
-
-              <article class="headline-module">
-                <div class="panel-head panel-head--tight">
-                  <h3>Return intent for 2027</h3>
-                  <p id="guest-return-summary"></p>
-                </div>
-                <div class="headline-body" id="guest-return-headline"></div>
-              </article>
-
-              <article class="headline-module">
-                <div class="panel-head panel-head--tight">
-                  <h3>Theme mix</h3>
-                  <p>How the active slice talks.</p>
-                </div>
-                <div class="headline-body" id="guest-theme-headline"></div>
-              </article>
-
-              <article class="headline-module">
-                <div class="panel-head panel-head--tight">
-                  <h3>Commerce overlap</h3>
-                  <p>Missed sales cross-read against browse appetite.</p>
-                </div>
-                <div class="headline-body" id="guest-commerce-headline"></div>
-              </article>
-            </div>
-          </section>
-
           <section class="story-stack">
             <div class="story-group">
               <div class="story-head">
@@ -1000,18 +993,26 @@
         });
       }
 
-      function renderSubviewTabs(targetId, items, activeId, onClick) {
+      function renderSubviewTabs(targetId, helpId, items, activeId, onClick) {
         const target = document.getElementById(targetId);
+        const help = helpId ? document.getElementById(helpId) : null;
         target.innerHTML = "";
         items.forEach((item) => {
           const button = document.createElement("button");
           button.type = "button";
-          button.className = "filter-chip";
-          button.textContent = item.label;
+          button.className = "subview-chip";
+          button.innerHTML = `<span class="subview-chip-label">${escapeHtml(item.label)}</span>`;
           button.setAttribute("aria-pressed", String(item.id === activeId));
+          if (item.description) {
+            button.title = item.description;
+          }
           button.addEventListener("click", () => onClick(item.id));
           target.appendChild(button);
         });
+        if (help) {
+          const active = items.find((item) => item.id === activeId);
+          help.textContent = active && active.description ? active.description : "";
+        }
       }
 
       function renderSubviewPanels(group, activeId) {
@@ -1330,10 +1331,11 @@
       function renderGuestSection(guest, guestRaw) {
         renderSubviewTabs(
           "guest-subviews",
+          "guest-subview-help",
           [
-            { id: "overview", label: "Overview" },
-            { id: "narrative", label: "Comments" },
-            { id: "marketplace", label: "Marketplace" },
+            { id: "overview", label: "Overview", description: "Core ratings, movement, facilities, and improvement signals for the active slice." },
+            { id: "narrative", label: "Comments", description: "Grouped open-text responses by prompt and semantic theme inside the current filtered slice." },
+            { id: "marketplace", label: "Marketplace", description: "Commerce-specific behaviour, missed purchases, browse appetite, and merch signals." },
           ],
           state.guestSubview,
           (id) => {
@@ -1413,34 +1415,6 @@
         const returnDefinite = guest.filter(
           (entry) => entry.return_intent === "Definitely - already planning it",
         ).length;
-        const musicAvg = average(guest.map((entry) => entry.music_rating));
-
-        buildMetricCards("guest-metrics", [
-          {
-            label: "Overall rating",
-            value: `${fmtNumber(average(guest.map((entry) => entry.overall_rating)), 2)} / 5`,
-            note: guest.length ? "Average in current slice" : "No responses in current slice",
-            subnote: `${guest.length} of ${guestRaw.length} guest responses`,
-          },
-          {
-            label: "Returning in 2027",
-            value: guest.length ? fmtPercent((returnDefinite / guest.length) * 100, 0) : "0%",
-            note: "Definitely already planning it",
-            subnote: `${returnDefinite} of ${guest.length || 0} responses`,
-          },
-          {
-            label: "Rated 4 or 5 stars",
-            value: guest.length ? fmtPercent((rated45 / guest.length) * 100, 0) : "0%",
-            note: `${rated45} of ${guest.length} responses`,
-            subnote: `${guestRaw.length ? fmtPercent((rated45 / guestRaw.length) * 100, 0) : "0%"} of full guest dataset`,
-          },
-          {
-            label: "Music programme",
-            value: `${fmtNumber(musicAvg, 2)} / 5`,
-            note: "Average music rating",
-            subnote: `${guest.filter((entry) => typeof entry.music_rating === "number").length} responses with music score`,
-          },
-        ]);
 
         const guestThemes = themeCountsFrom(guest, detectGuestThemes);
         const ratingOrder = [2, 3, 4, 5];
@@ -1728,10 +1702,11 @@
       function renderVendorSection(vendor, vendorRaw) {
         renderSubviewTabs(
           "vendor-subviews",
+          null,
           [
-            { id: "overview", label: "Overview" },
-            { id: "narrative", label: "Comments" },
-            { id: "marketplace", label: "Marketplace" },
+            { id: "overview", label: "Overview", description: "Core vendor ratings, operational pressure points, and improvement requests." },
+            { id: "narrative", label: "Comments", description: "Grouped vendor comments by operational theme and response prompt." },
+            { id: "marketplace", label: "Marketplace", description: "Marketplace appetite and related vendor commentary." },
           ],
           state.vendorSubview,
           (id) => {

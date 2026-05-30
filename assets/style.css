@@ -343,26 +343,15 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   gap: 6px;
 }
 
-.overview-ribbon {
-  display: grid;
-  gap: 8px;
-}
-
-.overview-context {
-  display: grid;
-  gap: 6px;
-}
-
-.headline-strip {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
 .headline-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+}
+
+.headline-grid--header {
+  padding-top: 4px;
+  border-top: 1px solid rgba(24, 20, 31, 0.08);
 }
 
 .headline-module {
@@ -596,8 +585,8 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 
 .control-bar {
   display: grid;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 6px;
+  padding: 8px 10px 10px;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(24, 20, 31, 0.08);
@@ -623,8 +612,7 @@ body[data-view="combined"] .control-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .control-summary-copy {
@@ -645,50 +633,40 @@ body[data-view="combined"] .control-bar {
   font-size: 0.82rem;
 }
 
-.top-signal-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
-.top-signal-row--micro .signal-pill {
-  min-height: 28px;
-  padding-inline: 8px;
-}
-
 .control-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
-.subview-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(24, 20, 31, 0.08);
-}
-
 .control-field {
-  display: grid;
-  gap: 6px;
-  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(24, 20, 31, 0.08);
+  font-size: 0.72rem;
   font-weight: 700;
   color: #615c68;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
+.control-field > span {
+  white-space: nowrap;
+}
+
 .control-select {
   width: 100%;
-  min-height: 32px;
-  border-radius: 10px;
-  border: 1px solid rgba(24, 20, 31, 0.1);
-  background: #fffdfa;
+  min-height: 30px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
   color: #18151e;
-  padding: 0 12px;
+  padding: 0;
 }
 
 .chart-wrap canvas {
@@ -699,6 +677,51 @@ body[data-view="combined"] .control-bar {
 .filter-block {
   display: grid;
   gap: 8px;
+}
+
+.subview-bar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.subview-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 2px;
+  border-radius: 10px;
+  background: rgba(24, 20, 31, 0.05);
+  border: 1px solid rgba(24, 20, 31, 0.08);
+}
+
+.subview-help {
+  color: #66606b;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.subview-chip {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #665f6c;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.subview-chip[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.96);
+  color: #17141d;
+  box-shadow: 0 4px 16px rgba(17, 18, 22, 0.08);
+}
+
+.subview-chip-label {
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .filter-chip {
@@ -806,14 +829,6 @@ body[data-view="combined"] .control-bar {
   font-size: 0.74rem;
 }
 
-.story-head--compact h3 {
-  font-size: 0.82rem;
-}
-
-.story-head--compact p {
-  font-size: 0.7rem;
-}
-
 .metric-ribbon .metric-card {
   padding: 8px 10px;
   gap: 3px;
@@ -822,24 +837,6 @@ body[data-view="combined"] .control-bar {
 
 .metric-ribbon .metric-value {
   font-size: clamp(1rem, 1.4vw, 1.28rem);
-}
-
-.metric-ribbon--compact .metric-card {
-  padding: 7px 9px;
-  background: rgba(255, 255, 255, 0.78);
-}
-
-.metric-ribbon--compact .metric-label {
-  font-size: 0.66rem;
-}
-
-.metric-ribbon--compact .metric-value {
-  font-size: clamp(0.92rem, 1.15vw, 1.12rem);
-}
-
-.metric-ribbon--compact .metric-note,
-.metric-ribbon--compact .metric-subnote {
-  font-size: 0.66rem;
 }
 
 .comment-browser {
