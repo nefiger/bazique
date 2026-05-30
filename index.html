@@ -75,11 +75,11 @@
         <div class="hero-banner">
           <article class="hero-panel fade-up">
             <p class="eyebrow">Post-event review snapshot</p>
-            <h1>Bazique 2026 in one interactive reporting surface.</h1>
+            <h1>Music, art, absurdism and the operational truth underneath it.</h1>
             <p>
-              Guest experience, vendor experience, and cross-dataset signals are all
-              explorable here. The dashboard is static, public-safe, and driven only by
-              cleaned JSON files generated from the original survey exports.
+              Guest experience, vendor experience, and the cross-dataset friction points
+              are all explorable here. The dashboard stays static and public-safe, but it
+              should still feel like Bazique rather than a generic reporting shell.
             </p>
             <div class="hero-tags">
               <span class="pill">102 cleaned guest responses</span>
@@ -1491,14 +1491,27 @@
           document.querySelector("main").innerHTML = `
             <section class="readme-note">
               <h1>Dashboard failed to load</h1>
-              <p class="fallback-copy">The JSON files could not be fetched. Serve this folder from a static web server so <code>fetch()</code> can load the local data files.</p>
+              <p class="fallback-copy">${escapeHtml(error && error.message ? error.message : "The dashboard assets did not initialise correctly.")}</p>
             </section>
           `;
           console.error(error);
         }
       }
 
-      init();
+      async function waitForChart(maxAttempts = 60) {
+        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+          if (window.Chart) {
+            return;
+          }
+          await new Promise((resolve) => window.setTimeout(resolve, 100));
+        }
+        throw new Error("Chart.js did not finish loading before the dashboard initialised.");
+      }
+
+      window.addEventListener("load", async () => {
+        await waitForChart();
+        await init();
+      });
     </script>
   </body>
 </html>
