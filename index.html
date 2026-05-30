@@ -16,7 +16,7 @@
       referrerpolicy="no-referrer"
     ></script>
   </head>
-  <body>
+  <body data-view="guest">
     <header class="topbar">
       <div class="topbar-inner">
         <a class="brand" href="#top">
@@ -26,51 +26,50 @@
             <span class="brand-subtitle">Feedback dashboard</span>
           </span>
         </a>
-
-        <div class="tablist" role="tablist" aria-label="Dashboard sections">
-          <button
-            class="tab-button"
-            type="button"
-            role="tab"
-            id="tab-guest"
-            aria-controls="panel-guest"
-            aria-selected="true"
-            data-tab="guest"
-          >
-            Guest Feedback
-          </button>
-          <button
-            class="tab-button"
-            type="button"
-            role="tab"
-            id="tab-vendor"
-            aria-controls="panel-vendor"
-            aria-selected="false"
-            data-tab="vendor"
-          >
-            Vendor Feedback
-          </button>
-          <button
-            class="tab-button"
-            type="button"
-            role="tab"
-            id="tab-combined"
-            aria-controls="panel-combined"
-            aria-selected="false"
-            data-tab="combined"
-          >
-            Combined View
-          </button>
-        </div>
-
-        <div class="report-links" aria-label="Report links">
-          <span class="ghost-chip" aria-disabled="true">Guest report pending</span>
-          <span class="ghost-chip" aria-disabled="true">Vendor report pending</span>
-        </div>
+        <div class="topbar-context" id="topbar-context"></div>
       </div>
     </header>
 
     <main class="page-shell" id="top">
+      <section class="dataset-switcher" role="tablist" aria-label="Dataset views">
+        <button
+          class="dataset-switch-button"
+          type="button"
+          role="tab"
+          id="tab-guest"
+          aria-controls="panel-guest"
+          aria-selected="true"
+          data-tab="guest"
+        >
+          <span class="dataset-switch-kicker">Festival guests</span>
+          <strong>Guest experience</strong>
+        </button>
+        <button
+          class="dataset-switch-button"
+          type="button"
+          role="tab"
+          id="tab-vendor"
+          aria-controls="panel-vendor"
+          aria-selected="false"
+          data-tab="vendor"
+        >
+          <span class="dataset-switch-kicker">Trading partners</span>
+          <strong>Vendor experience</strong>
+        </button>
+        <button
+          class="dataset-switch-button"
+          type="button"
+          role="tab"
+          id="tab-combined"
+          aria-controls="panel-combined"
+          aria-selected="false"
+          data-tab="combined"
+        >
+          <span class="dataset-switch-kicker">Cross-dataset</span>
+          <strong>Combined view</strong>
+        </button>
+      </section>
+
       <section
         class="tab-panel section-block fade-up delay-2"
         id="panel-guest"
@@ -80,13 +79,9 @@
         <section class="control-bar">
           <div class="control-summary">
             <div class="control-summary-copy">
+              <span class="dataset-badge dataset-badge--guest">Guest feedback</span>
               <span class="control-kicker">Current slice</span>
               <strong id="guest-slice-summary">All guest responses</strong>
-            </div>
-            <div class="top-signal-row top-signal-row--micro">
-              <span class="signal-pill" id="hero-guest-highlight">Awaiting data</span>
-              <span class="signal-pill" id="hero-vendor-highlight">Awaiting data</span>
-              <span class="signal-pill" id="hero-combined-highlight">Awaiting data</span>
             </div>
           </div>
           <div class="control-grid" id="guest-controls"></div>
@@ -108,9 +103,7 @@
                   <h3>Overall rating distribution</h3>
                   <p id="guest-overall-summary"></p>
                 </div>
-                <div class="chart-wrap ribbon">
-                  <canvas id="guest-overall-chart" aria-label="Guest overall rating distribution"></canvas>
-                </div>
+                <div class="headline-body" id="guest-overall-headline"></div>
               </article>
 
               <article class="headline-module">
@@ -118,9 +111,7 @@
                   <h3>Return intent for 2027</h3>
                   <p id="guest-return-summary"></p>
                 </div>
-                <div class="chart-wrap ribbon">
-                  <canvas id="guest-return-chart" aria-label="Guest return intent for 2027"></canvas>
-                </div>
+                <div class="headline-body" id="guest-return-headline"></div>
               </article>
 
               <article class="headline-module">
@@ -128,9 +119,7 @@
                   <h3>Theme mix</h3>
                   <p>How the active slice talks.</p>
                 </div>
-                <div class="chart-wrap ribbon">
-                  <canvas id="guest-theme-chart" aria-label="Guest semantic theme mix"></canvas>
-                </div>
+                <div class="headline-body" id="guest-theme-headline"></div>
               </article>
 
               <article class="headline-module">
@@ -138,9 +127,7 @@
                   <h3>Commerce overlap</h3>
                   <p>Missed sales cross-read against browse appetite.</p>
                 </div>
-                <div class="chart-wrap ribbon">
-                  <canvas id="guest-commerce-overlap-chart" aria-label="Guest commerce overlap"></canvas>
-                </div>
+                <div class="headline-body" id="guest-commerce-headline"></div>
               </article>
             </div>
           </section>
@@ -290,6 +277,7 @@
         <section class="control-bar">
           <div class="control-summary">
             <div class="control-summary-copy">
+              <span class="dataset-badge dataset-badge--vendor">Vendor feedback</span>
               <span class="control-kicker">Current slice</span>
               <strong id="vendor-slice-summary">All vendor responses</strong>
             </div>
@@ -1004,7 +992,8 @@
       }
 
       function renderTabs() {
-        document.querySelectorAll(".tab-button").forEach((button) => {
+        document.body.dataset.view = state.activeTab;
+        document.querySelectorAll(".dataset-switch-button").forEach((button) => {
           const selected = button.dataset.tab === state.activeTab;
           button.setAttribute("aria-selected", String(selected));
           document.getElementById(`panel-${button.dataset.tab}`).hidden = !selected;
@@ -1029,6 +1018,125 @@
         document.querySelectorAll(`[data-panel-group="${group}"]`).forEach((panel) => {
           panel.hidden = panel.dataset.subviewPanel !== activeId;
         });
+      }
+
+      function buildMeterRows(items, fillClass) {
+        return items
+          .map(
+            (item) => `
+              <div class="${escapeHtml(item.rowClass || "dist-row")}">
+                <span class="${escapeHtml(item.labelClass || "dist-label")}">${escapeHtml(item.label)}</span>
+                <span class="meter-track"><span class="meter-fill ${escapeHtml(fillClass)}" style="width:${item.share}%"></span></span>
+                <span class="${escapeHtml(item.valueClass || "dist-value")}">${escapeHtml(item.value)}</span>
+              </div>
+            `,
+          )
+          .join("");
+      }
+
+      function renderTopbarContext(guest, guestRaw, vendor, vendorRaw) {
+        const target = document.getElementById("topbar-context");
+        let items = [];
+
+        if (state.activeTab === "guest") {
+          const overall = average(guest.map((entry) => entry.overall_rating));
+          const rated45 = guest.filter((entry) => entry.overall_rating >= 4).length;
+          const returnDefinite = guest.filter(
+            (entry) => entry.return_intent === "Definitely - already planning it",
+          ).length;
+          items = [
+            {
+              label: "Slice size",
+              value: `${guest.length} / ${guestRaw.length}`,
+              note: "guest responses in view",
+            },
+            {
+              label: "Overall rating",
+              value: `${fmtNumber(overall, 2)} / 5`,
+              note: "average in current slice",
+            },
+            {
+              label: "Rated 4 or 5",
+              value: guest.length ? fmtPercent((rated45 / guest.length) * 100, 0) : "0%",
+              note: `${rated45} responses`,
+            },
+            {
+              label: "Definite return",
+              value: guest.length ? fmtPercent((returnDefinite / guest.length) * 100, 0) : "0%",
+              note: `${returnDefinite} already planning 2027`,
+            },
+          ];
+        } else if (state.activeTab === "vendor") {
+          const commsAvg = average(vendor.map((entry) => entry.rating_comms));
+          const locationAvg = average(vendor.map((entry) => entry.rating_location));
+          const definite = vendor.filter((entry) => entry.return_intent === "Yes, definitely").length;
+          items = [
+            {
+              label: "Slice size",
+              value: `${vendor.length} / ${vendorRaw.length}`,
+              note: "vendor responses in view",
+            },
+            {
+              label: "Comms",
+              value: `${fmtNumber(commsAvg, 2)} / 5`,
+              note: "lead-up communication",
+            },
+            {
+              label: "Location",
+              value: `${fmtNumber(locationAvg, 2)} / 5`,
+              note: "foot traffic / placement",
+            },
+            {
+              label: "Definite return",
+              value: `${definite}`,
+              note: "vendors already back for 2027",
+            },
+          ];
+        } else {
+          const missed = guest.filter((entry) => entry.missed_purchase && entry.missed_purchase !== "No").length;
+          const positiveBrowse = guest.filter((entry) =>
+            ["Yes - I'd definitely use that", "Probably - sounds handy"].includes(entry.prebrowse_interest),
+          ).length;
+          const activeMarketplaceVendors = vendor.filter((entry) =>
+            ["Very interested - I'd want to be involved from the start", "Interested - tell me more"].includes(
+              entry.marketplace_interest,
+            ),
+          ).length;
+          items = [
+            {
+              label: "Shared theme",
+              value: "Connectivity",
+              note: "also layout and conversion",
+            },
+            {
+              label: "Guest demand",
+              value: guest.length ? fmtPercent((missed / guest.length) * 100, 0) : "0%",
+              note: "missed a purchase",
+            },
+            {
+              label: "Browse appetite",
+              value: guest.length ? fmtPercent((positiveBrowse / guest.length) * 100, 0) : "0%",
+              note: "positive pre-browse signal",
+            },
+            {
+              label: "Vendor supply",
+              value: `${activeMarketplaceVendors}/${vendor.length}`,
+              note: "actively interested in marketplace",
+            },
+          ];
+        }
+
+        target.innerHTML = items
+          .map(
+            (item) => `
+              <article class="topbar-stat">
+                <span class="topbar-stat-label">${escapeHtml(item.label)}</span>
+                <strong class="topbar-stat-value">${escapeHtml(item.value)}</strong>
+                <span class="topbar-stat-note">${escapeHtml(item.note)}</span>
+              </article>
+            `,
+          )
+          .join("");
       }
 
       function getGuestQuotes(guest) {
@@ -1335,70 +1443,26 @@
         ]);
 
         const guestThemes = themeCountsFrom(guest, detectGuestThemes);
-        makeBarChart("guest-theme-chart", {
-          labels: guestThemes.map(([label]) => label),
-          values: guestThemes.map(([, value]) => value),
-          color: guestThemes.map(([,], index) => [colors.purple, colors.teal, colors.amber, colors.blue, colors.coral, "#5c56ad"][index % 6]),
-          axis: "y",
-          min: 0,
-          max: undefined,
-        });
-
-        createChart("guest-commerce-overlap-chart", {
-          type: "bar",
-          data: {
-            labels: ["No missed purchase", "Yes, once", "Yes, >1"],
-            datasets: [
-              {
-                label: "Definitely use pre-browse",
-                data: [
-                  guest.filter((entry) => entry.missed_purchase === "No" && entry.prebrowse_interest === "Yes - I'd definitely use that").length,
-                  guest.filter((entry) => entry.missed_purchase === "Yes, once" && entry.prebrowse_interest === "Yes - I'd definitely use that").length,
-                  guest.filter((entry) => entry.missed_purchase === "Yes, more than once" && entry.prebrowse_interest === "Yes - I'd definitely use that").length,
-                ],
-                backgroundColor: colors.teal,
-                borderRadius: 8,
-              },
-              {
-                label: "Probably useful",
-                data: [
-                  guest.filter((entry) => entry.missed_purchase === "No" && entry.prebrowse_interest === "Probably - sounds handy").length,
-                  guest.filter((entry) => entry.missed_purchase === "Yes, once" && entry.prebrowse_interest === "Probably - sounds handy").length,
-                  guest.filter((entry) => entry.missed_purchase === "Yes, more than once" && entry.prebrowse_interest === "Probably - sounds handy").length,
-                ],
-                backgroundColor: colors.blue,
-                borderRadius: 8,
-              },
-              {
-                label: "Discovery-first",
-                data: [
-                  guest.filter((entry) => entry.missed_purchase === "No" && entry.prebrowse_interest === "Not really - I enjoy discovering things on the day").length,
-                  guest.filter((entry) => entry.missed_purchase === "Yes, once" && entry.prebrowse_interest === "Not really - I enjoy discovering things on the day").length,
-                  guest.filter((entry) => entry.missed_purchase === "Yes, more than once" && entry.prebrowse_interest === "Not really - I enjoy discovering things on the day").length,
-                ],
-                backgroundColor: colors.amber,
-                borderRadius: 8,
-              },
-            ],
-          },
-          options: baseChartOptions({
-            plugins: { legend: { position: "bottom" } },
-            scales: {
-              x: { stacked: true, ticks: { color: colors.muted }, grid: { color: "rgba(34,34,34,0.08)" }, border: { color: "rgba(34,34,34,0.12)" } },
-              y: { stacked: true, ticks: { color: colors.ink }, grid: { color: "rgba(34,34,34,0.08)" }, border: { display: false } },
-            },
-          }),
-        });
-
         const ratingOrder = [2, 3, 4, 5];
         const overallCounts = countBy(guest, (entry) => entry.overall_rating, ratingOrder);
-        makeBarChart("guest-overall-chart", {
-          labels: ratingOrder.map((value) => `${value}★`),
-          values: ratingOrder.map((value) => overallCounts.get(value) || 0),
-          color: ratingOrder.map((value) => ratingColor(value)),
-          min: 0,
-          max: undefined,
-        });
+        document.getElementById("guest-overall-headline").innerHTML = `
+          <div class="dist-list">
+            ${buildMeterRows(
+              ratingOrder
+                .slice()
+                .reverse()
+                .map((value) => {
+                  const count = overallCounts.get(value) || 0;
+                  return {
+                    label: `${value}★`,
+                    value: guest.length ? `${fmtPercent((count / guest.length) * 100, 0)} · ${count}` : "0",
+                    share: guest.length ? (count / guest.length) * 100 : 0,
+                  };
+                }),
+              "meter-fill--teal",
+            )}
+          </div>
+        `;
         document.getElementById("guest-overall-summary").textContent =
           `${guest.filter((entry) => entry.overall_rating === 5).length} guests gave Bazique a full 5 stars.`;
 
@@ -1410,14 +1474,84 @@
           "Unlikely",
         ];
         const guestReturnCounts = countBy(guest, (entry) => entry.return_intent, guestReturnOrder);
-        makeStackedSingleBar(
-          "guest-return-chart",
-          guestReturnOrder,
-          guestReturnCounts,
-          categoryColors.guestReturn,
-        );
+        document.getElementById("guest-return-headline").innerHTML = `
+          <div class="intent-bar">
+            ${guestReturnOrder
+              .map((label) => {
+                const count = guestReturnCounts.get(label) || 0;
+                const share = guest.length ? (count / guest.length) * 100 : 0;
+                return `<span class="intent-segment" style="width:${share}%; background:${categoryColors.guestReturn[label]}"></span>`;
+              })
+              .join("")}
+          </div>
+          <div class="intent-list">
+            ${buildMeterRows(
+              guestReturnOrder.map((label) => {
+                const count = guestReturnCounts.get(label) || 0;
+                return {
+                  rowClass: "intent-row",
+                  labelClass: "intent-label",
+                  valueClass: "intent-value",
+                  label: label.replace("Definitely - already planning it", "Definitely").replace("Very likely", "Very likely"),
+                  value: guest.length ? `${fmtPercent((count / guest.length) * 100, 0)} · ${count}` : "0",
+                  share: guest.length ? (count / guest.length) * 100 : 0,
+                };
+              }),
+              "meter-fill--amber",
+            )}
+          </div>
+        `;
         document.getElementById("guest-return-summary").textContent =
           `${guestReturnCounts.get("Definitely - already planning it") || 0} guests are already planning to return.`;
+
+        document.getElementById("guest-theme-headline").innerHTML = `
+          <div class="theme-list">
+            ${buildMeterRows(
+              guestThemes.slice(0, 5).map(([label, count]) => ({
+                rowClass: "theme-row",
+                labelClass: "theme-label",
+                valueClass: "theme-value",
+                label,
+                value: guest.length ? `${fmtPercent((count / guest.length) * 100, 0)} · ${count}` : `${count}`,
+                share: guest.length ? (count / guest.length) * 100 : 0,
+              })),
+              "meter-fill--blue",
+            )}
+          </div>
+        `;
+
+        const commerceBands = [
+          { key: "No", label: "No missed purchase" },
+          { key: "Yes, once", label: "Missed once" },
+          { key: "Yes, more than once", label: "Missed >1" },
+        ];
+        document.getElementById("guest-commerce-headline").innerHTML = `
+          <div class="commerce-columns">
+            ${commerceBands
+              .map((band) => {
+                const inBand = guest.filter((entry) => entry.missed_purchase === band.key);
+                const definite = inBand.filter((entry) => entry.prebrowse_interest === "Yes - I'd definitely use that").length;
+                const probable = inBand.filter((entry) => entry.prebrowse_interest === "Probably - sounds handy").length;
+                const positive = definite + probable;
+                const positiveShare = inBand.length ? (positive / inBand.length) * 100 : 0;
+                return `
+                  <div class="commerce-column">
+                    <strong>${band.label}</strong>
+                    <div class="commerce-stat">
+                      <span class="commerce-stat-label">Slice count</span>
+                      <span class="commerce-stat-value">${inBand.length}</span>
+                    </div>
+                    <div class="commerce-stat">
+                      <span class="commerce-stat-label">Pre-browse positive</span>
+                      <span class="commerce-stat-value">${fmtPercent(positiveShare, 0)}</span>
+                    </div>
+                    <span class="meter-track"><span class="meter-fill meter-fill--teal" style="width:${positiveShare}%"></span></span>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
 
         const facilityMap = [
           ["Toilets availability", "facility_toilets_availability"],
@@ -2032,46 +2166,25 @@
       }
 
       function renderHero(guest, vendor) {
-        const facilityMap = [
-          ["Toilets availability", "facility_toilets_availability"],
-          ["Toilets cleanliness", "facility_toilets_cleanliness"],
-          ["Showers", "facility_showers"],
-          ["Water stations", "facility_water"],
-          ["Glamping", "facility_glamping"],
-          ["Parking", "facility_parking"],
-        ];
-        const bestFacility = facilityMap
-          .map(([label, key]) => ({ label, score: average(guest.map((entry) => entry[key])) }))
-          .sort((a, b) => b.score - a.score)[0];
-        const weakestVendorDimension = [
-          ["Location", average(vendor.map((entry) => entry.rating_location))],
-          ["Infrastructure", average(vendor.map((entry) => entry.rating_infrastructure))],
-          ["Support", average(vendor.map((entry) => entry.rating_support))],
-        ].sort((a, b) => a[1] - b[1])[0];
-
-        document.getElementById("hero-guest-highlight").innerHTML =
-          `<span class="signal-pill-label">Guest high</span><span>${bestFacility.label} · ${fmtNumber(bestFacility.score, 2)} / 5</span>`;
-        document.getElementById("hero-vendor-highlight").innerHTML =
-          `<span class="signal-pill-label">Vendor low</span><span>${weakestVendorDimension[0]} · ${fmtNumber(weakestVendorDimension[1], 2)} / 5</span>`;
-        document.getElementById("hero-combined-highlight").innerHTML =
-          `<span class="signal-pill-label">Shared theme</span><span>Connectivity, layout, conversion</span>`;
+        renderTopbarContext(guest, window.__dashboardData.guest, vendor, window.__dashboardData.vendor);
       }
 
       function renderDashboard() {
         const guestFiltered = filterGuestData(window.__dashboardData.guest);
         const vendorFiltered = filterVendorData(window.__dashboardData.vendor);
 
-        renderHero(window.__dashboardData.guest, window.__dashboardData.vendor);
+        renderHero(guestFiltered.length ? guestFiltered : window.__dashboardData.guest, vendorFiltered.length ? vendorFiltered : window.__dashboardData.vendor);
         renderGuestSection(guestFiltered, window.__dashboardData.guest);
         renderVendorSection(vendorFiltered, window.__dashboardData.vendor);
         renderCombinedSection(guestFiltered.length ? guestFiltered : window.__dashboardData.guest, vendorFiltered.length ? vendorFiltered : window.__dashboardData.vendor);
+        renderTabs();
       }
 
       function setupTabs() {
-        document.querySelectorAll(".tab-button").forEach((button) => {
+        document.querySelectorAll(".dataset-switch-button").forEach((button) => {
           button.addEventListener("click", () => {
             state.activeTab = button.dataset.tab;
-            renderTabs();
+            renderDashboard();
           });
         });
       }
@@ -2090,12 +2203,8 @@
             vendorResponse.json(),
           ]);
           window.__dashboardData = { guest, vendor };
-          renderDashboard();
-          if (!chartsEnabled) {
-            document.getElementById("hero-combined-highlight").textContent = "Data loaded, charts unavailable";
-          }
           setupTabs();
-          renderTabs();
+          renderDashboard();
         } catch (error) {
           document.querySelector("main").innerHTML = `
             <section class="readme-note">
