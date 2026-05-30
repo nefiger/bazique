@@ -71,39 +71,19 @@
     </header>
 
     <main class="page-shell" id="top">
-      <section class="hero">
-        <div class="hero-banner">
-          <article class="hero-panel fade-up">
-            <p class="eyebrow">Post-event review snapshot</p>
-            <h1>Guest, vendor, and overlap signals.</h1>
-            <p>
-              Filter the response set by operational theme, sentiment, and marketplace
-              behaviour to find overlaps and pressure points quickly.
-            </p>
-            <div class="hero-tags">
-              <span class="pill">102 cleaned guest responses</span>
-              <span class="pill">11 vendor responses</span>
-              <span class="pill">Interactive static dashboard</span>
-            </div>
-          </article>
-
-          <aside class="insight-panel fade-up delay-1" aria-label="Overview insights">
-            <p class="eyebrow">Immediate signals</p>
-            <div class="insight-list">
-              <div class="insight-item">
-                <span class="insight-label">Strongest guest score</span>
-                <span class="insight-value" id="hero-guest-highlight">Awaiting data</span>
-              </div>
-              <div class="insight-item">
-                <span class="insight-label">Biggest vendor friction</span>
-                <span class="insight-value" id="hero-vendor-highlight">Awaiting data</span>
-              </div>
-              <div class="insight-item">
-                <span class="insight-label">Shared planning theme</span>
-                <span class="insight-value" id="hero-combined-highlight">Awaiting data</span>
-              </div>
-            </div>
-          </aside>
+      <section class="dashboard-intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Analysis workspace</p>
+          <h1>Bazique 2026 response explorer</h1>
+          <p>
+            Explore slices, overlaps, and narrative themes across guest and vendor
+            feedback without leaving the page.
+          </p>
+        </div>
+        <div class="intro-signals" id="intro-signals">
+          <span class="signal-pill" id="hero-guest-highlight">Awaiting data</span>
+          <span class="signal-pill" id="hero-vendor-highlight">Awaiting data</span>
+          <span class="signal-pill" id="hero-combined-highlight">Awaiting data</span>
         </div>
       </section>
 
@@ -113,14 +93,6 @@
         role="tabpanel"
         aria-labelledby="tab-guest"
       >
-        <div class="section-head">
-          <h2>Guest feedback</h2>
-          <p>
-            Ratings, space performance, and the open-text signal behind the headline
-            scores.
-          </p>
-        </div>
-
         <section class="control-bar">
           <div class="control-summary">
             <span class="control-kicker">Current slice</span>
@@ -129,7 +101,35 @@
           <div class="control-grid" id="guest-controls"></div>
         </section>
 
-        <div class="metrics-grid" id="guest-metrics"></div>
+        <section class="workbench-grid">
+          <article class="compact-panel compact-panel--metrics">
+            <div class="panel-head">
+              <h2>Guest slice profile</h2>
+              <p>Compact view of the active filtered subset.</p>
+            </div>
+            <div class="mini-metrics-grid" id="guest-metrics"></div>
+          </article>
+
+          <article class="compact-panel">
+            <div class="panel-head">
+              <h3>Theme mix</h3>
+              <p>Semantic distribution of comments in the current slice.</p>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas id="guest-theme-chart" aria-label="Guest semantic theme mix"></canvas>
+            </div>
+          </article>
+
+          <article class="compact-panel">
+            <div class="panel-head">
+              <h3>Commerce overlap</h3>
+              <p>Missed purchases cross-read against browse appetite.</p>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas id="guest-commerce-overlap-chart" aria-label="Guest commerce overlap"></canvas>
+            </div>
+          </article>
+        </section>
 
         <div class="chart-grid two-col">
           <article class="chart-card">
@@ -279,14 +279,6 @@
         aria-labelledby="tab-vendor"
         hidden
       >
-        <div class="section-head">
-          <h2>Vendor feedback</h2>
-          <p>
-            Trading conditions, vendor management, marketplace interest, and how vendor
-            experience split across food and non-food traders.
-          </p>
-        </div>
-
         <section class="control-bar">
           <div class="control-summary">
             <span class="control-kicker">Current slice</span>
@@ -295,7 +287,35 @@
           <div class="control-grid" id="vendor-controls"></div>
         </section>
 
-        <div class="metrics-grid" id="vendor-metrics"></div>
+        <section class="workbench-grid">
+          <article class="compact-panel compact-panel--metrics">
+            <div class="panel-head">
+              <h2>Vendor slice profile</h2>
+              <p>How the active subset changes the trading picture.</p>
+            </div>
+            <div class="mini-metrics-grid" id="vendor-metrics"></div>
+          </article>
+
+          <article class="compact-panel">
+            <div class="panel-head">
+              <h3>Operational theme mix</h3>
+              <p>Tagged vendor concerns in the current subset.</p>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas id="vendor-theme-chart" aria-label="Vendor semantic theme mix"></canvas>
+            </div>
+          </article>
+
+          <article class="compact-panel">
+            <div class="panel-head">
+              <h3>Type x marketplace appetite</h3>
+              <p>Food and non-food vendors compared on marketplace participation.</p>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas id="vendor-type-marketplace-chart" aria-label="Vendor type by marketplace interest"></canvas>
+            </div>
+          </article>
+        </section>
 
         <article class="chart-card">
           <div class="chart-head">
@@ -1066,6 +1086,14 @@
         });
       }
 
+      function themeCountsFrom(items, detector) {
+        const counts = new Map();
+        items.forEach((entry) => {
+          detector(entry).forEach((theme) => counts.set(theme, (counts.get(theme) || 0) + 1));
+        });
+        return asEntries(counts).sort((a, b) => b[1] - a[1]);
+      }
+
       function renderGuestSection(guest, guestRaw) {
         renderSelectControls("guest-controls", [
           {
@@ -1165,6 +1193,62 @@
             note: "Average music rating",
           },
         ]);
+
+        const guestThemes = themeCountsFrom(guest, detectGuestThemes);
+        makeBarChart("guest-theme-chart", {
+          labels: guestThemes.map(([label]) => label),
+          values: guestThemes.map(([, value]) => value),
+          color: guestThemes.map(([,], index) => [colors.purple, colors.teal, colors.amber, colors.blue, colors.coral, "#5c56ad"][index % 6]),
+          axis: "y",
+          min: 0,
+          max: undefined,
+        });
+
+        createChart("guest-commerce-overlap-chart", {
+          type: "bar",
+          data: {
+            labels: ["No missed purchase", "Yes, once", "Yes, >1"],
+            datasets: [
+              {
+                label: "Definitely use pre-browse",
+                data: [
+                  guest.filter((entry) => entry.missed_purchase === "No" && entry.prebrowse_interest === "Yes - I'd definitely use that").length,
+                  guest.filter((entry) => entry.missed_purchase === "Yes, once" && entry.prebrowse_interest === "Yes - I'd definitely use that").length,
+                  guest.filter((entry) => entry.missed_purchase === "Yes, more than once" && entry.prebrowse_interest === "Yes - I'd definitely use that").length,
+                ],
+                backgroundColor: colors.teal,
+                borderRadius: 8,
+              },
+              {
+                label: "Probably useful",
+                data: [
+                  guest.filter((entry) => entry.missed_purchase === "No" && entry.prebrowse_interest === "Probably - sounds handy").length,
+                  guest.filter((entry) => entry.missed_purchase === "Yes, once" && entry.prebrowse_interest === "Probably - sounds handy").length,
+                  guest.filter((entry) => entry.missed_purchase === "Yes, more than once" && entry.prebrowse_interest === "Probably - sounds handy").length,
+                ],
+                backgroundColor: colors.blue,
+                borderRadius: 8,
+              },
+              {
+                label: "Discovery-first",
+                data: [
+                  guest.filter((entry) => entry.missed_purchase === "No" && entry.prebrowse_interest === "Not really - I enjoy discovering things on the day").length,
+                  guest.filter((entry) => entry.missed_purchase === "Yes, once" && entry.prebrowse_interest === "Not really - I enjoy discovering things on the day").length,
+                  guest.filter((entry) => entry.missed_purchase === "Yes, more than once" && entry.prebrowse_interest === "Not really - I enjoy discovering things on the day").length,
+                ],
+                backgroundColor: colors.amber,
+                borderRadius: 8,
+              },
+            ],
+          },
+          options: baseChartOptions({
+            plugins: { legend: { position: "bottom" } },
+            scales: {
+              x: { stacked: true, ticks: { color: colors.muted }, grid: { color: "rgba(34,34,34,0.08)" }, border: { color: "rgba(34,34,34,0.12)" } },
+              y: { stacked: true, ticks: { color: colors.ink }, grid: { color: "rgba(34,34,34,0.08)" }, border: { display: false } },
+            },
+          }),
+        });
 
         const ratingOrder = [2, 3, 4, 5];
         const overallCounts = countBy(guest, (entry) => entry.overall_rating, ratingOrder);
@@ -1479,6 +1563,59 @@
             note: "Weakest vendor score in the dataset",
           },
         ]);
+
+        const vendorThemes = themeCountsFrom(vendor, detectVendorThemes);
+        makeBarChart("vendor-theme-chart", {
+          labels: vendorThemes.map(([label]) => label),
+          values: vendorThemes.map(([, value]) => value),
+          color: vendorThemes.map(([,], index) => [colors.coral, colors.teal, colors.blue, colors.amber, colors.purple, "#5c56ad"][index % 6]),
+          axis: "y",
+          min: 0,
+          max: undefined,
+        });
+
+        createChart("vendor-type-marketplace-chart", {
+          type: "bar",
+          data: {
+            labels: ["Food", "Non-food"],
+            datasets: [
+              {
+                label: "Very interested / interested",
+                data: [
+                  vendor.filter((entry) => entry.type === "Food" && ["Very interested - I'd want to be involved from the start", "Interested - tell me more"].includes(entry.marketplace_interest)).length,
+                  vendor.filter((entry) => entry.type === "Non-food" && ["Very interested - I'd want to be involved from the start", "Interested - tell me more"].includes(entry.marketplace_interest)).length,
+                ],
+                backgroundColor: colors.teal,
+                borderRadius: 8,
+              },
+              {
+                label: "Not sure",
+                data: [
+                  vendor.filter((entry) => entry.type === "Food" && entry.marketplace_interest === "Not sure - depends on how it works").length,
+                  vendor.filter((entry) => entry.type === "Non-food" && entry.marketplace_interest === "Not sure - depends on how it works").length,
+                ],
+                backgroundColor: colors.amber,
+                borderRadius: 8,
+              },
+              {
+                label: "Not for me",
+                data: [
+                  vendor.filter((entry) => entry.type === "Food" && entry.marketplace_interest === "Not for me").length,
+                  vendor.filter((entry) => entry.type === "Non-food" && entry.marketplace_interest === "Not for me").length,
+                ],
+                backgroundColor: colors.coral,
+                borderRadius: 8,
+              },
+            ],
+          },
+          options: baseChartOptions({
+            plugins: { legend: { position: "bottom" } },
+            scales: {
+              x: { stacked: true, ticks: { color: colors.muted }, grid: { color: "rgba(34,34,34,0.08)" }, border: { color: "rgba(34,34,34,0.12)" } },
+              y: { stacked: true, ticks: { color: colors.ink }, grid: { color: "rgba(34,34,34,0.08)" }, border: { display: false } },
+            },
+          }),
+        });
 
         const vendorRatings = [
           ["Communication", commsAvg],
