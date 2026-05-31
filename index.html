@@ -72,10 +72,7 @@
           <div class="control-grid" id="guest-controls"></div>
           <div class="workspace-rail">
             <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
-            <details class="insights-drawer">
-              <summary>Insights</summary>
-              <div class="insights-inline" id="guest-insights"></div>
-            </details>
+            <div class="insights-panel" id="guest-insights"></div>
           </div>
         </section>
 
@@ -201,7 +198,7 @@
           </div>
 
           <div class="chart-grid two-col">
-            <article class="chart-card">
+            <article class="chart-card chart-card--tight">
               <div class="chart-head">
                 <h3 class="chart-title">Missed purchase moments</h3>
               </div>
@@ -211,7 +208,7 @@
               </div>
             </article>
 
-            <article class="chart-card">
+            <article class="chart-card chart-card--tight">
               <div class="chart-head">
                 <h3 class="chart-title">Pre-browse interest</h3>
               </div>
@@ -222,7 +219,7 @@
             </article>
           </div>
 
-          <article class="chart-card">
+          <article class="chart-card chart-card--tight">
             <div class="chart-head">
               <h3 class="chart-title">Merch category mentions</h3>
             </div>
@@ -257,8 +254,9 @@
       >
         <section class="control-bar">
           <div class="control-grid" id="vendor-controls"></div>
-          <div class="workspace-rail workspace-rail--single">
+          <div class="workspace-rail">
             <div class="subview-tabs" id="vendor-subviews" aria-label="Vendor subviews"></div>
+            <div class="insights-panel" id="vendor-insights"></div>
           </div>
         </section>
 
@@ -395,7 +393,7 @@
           </div>
 
           <div class="chart-grid two-col">
-            <article class="chart-card">
+            <article class="chart-card chart-card--tight">
               <div class="chart-head">
                 <h3 class="chart-title">Marketplace interest</h3>
               </div>
@@ -405,7 +403,7 @@
               </div>
             </article>
 
-            <article class="chart-card">
+            <article class="chart-card chart-card--tight">
               <div class="chart-head">
                 <h3 class="chart-title">Marketplace comment filter</h3>
               </div>
@@ -512,7 +510,6 @@
         { id: "all", label: "All", field: null },
         { id: "best_part", label: "Best part", field: "best_part" },
         { id: "shortfalls", label: "Shortfalls", field: "shortfalls" },
-        { id: "merch_thoughts", label: "Merch thoughts", field: "merch_thoughts" },
         { id: "wishlist_artist", label: "Artist wishlist", field: "wishlist_artist" },
       ];
 
@@ -1180,6 +1177,21 @@
         });
       }
 
+      function renderInsightsPanel(targetId, title, items) {
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        if (!items.length) {
+          target.innerHTML = "";
+          return;
+        }
+        target.innerHTML = `
+          <span class="insights-panel-label">${escapeHtml(title)}</span>
+          <div class="insights-panel-items">
+            ${items.map((item) => `<span class="insight-inline-item">${escapeHtml(item)}</span>`).join("")}
+          </div>
+        `;
+      }
+
       function buildMeterRows(items, fillClass) {
         return items
           .map(
@@ -1554,36 +1566,74 @@
         ).length;
         const topTheme = guestThemes[0];
         const vendorLocation = average(window.__dashboardData.vendor.map((entry) => entry.rating_location));
-        const vendorSupport = average(window.__dashboardData.vendor.map((entry) => entry.rating_support));
-        const insights = [];
-        insights.push(
+        const overviewInsights = [];
+        overviewInsights.push(
           `${fiveStarCount} guests gave Bazique a full 5 stars (${guest.length ? fmtPercent((fiveStarCount / guest.length) * 100, 0) : "0%"} of this slice).`,
         );
         if (atRisk.length >= 3 && likely.length >= 3) {
-          insights.push(
+          overviewInsights.push(
             `${atRisk.length} guests are unsure or unlikely to return; their layout score drops to ${fmtNumber(atRiskLayout, 2)} / 5 vs ${fmtNumber(likelyLayout, 2)} for likely returners.`,
           );
         }
         if (atRisk.length >= 3 && typeof atRiskMusic === "number" && atRiskMusic > 0) {
-          insights.push(
+          overviewInsights.push(
             `Among at-risk guests, music still scores ${fmtNumber(atRiskMusic, 2)} / 5, pointing to operational drag rather than programme weakness.`,
           );
         }
         if (softReturn.length >= 4 && likely.length >= 4) {
-          insights.push(
+          overviewInsights.push(
             `${softReturn.length ? fmtPercent((softMissed / softReturn.length) * 100, 0) : "0%"} of softer-return guests missed a purchase vs ${likely.length ? fmtPercent((likelyMissed / likely.length) * 100, 0) : "0%"} of likely returners; vendor location sits at ${fmtNumber(vendorLocation, 2)} / 5.`,
           );
         }
         if (topTheme) {
-          insights.push(
+          overviewInsights.push(
             `${topTheme[0]} leads the narrative in this slice, appearing in ${guest.length ? fmtPercent((topTheme[1] / guest.length) * 100, 0) : "0%"} of open-text responses.`,
           );
         }
 
-        document.getElementById("guest-insights").innerHTML = insights
-          .slice(0, 2)
-          .map((text) => `<span class="insight-inline-item">${escapeHtml(text)}</span>`)
-          .join("");
+        const guestCommentEntries = getGuestQuotes(guest);
+        const guestCommentThemes = themeCountsFrom(
+          guestCommentEntries.map((entry) => ({ ...entry, __themes: entry.themes })),
+          (entry) => entry.__themes || ["General"],
+        );
+        const guestCommentTop = guestCommentThemes[0];
+
+        const guestMarketplaceCore = guest.filter(
+          (entry) => entry.missed_purchase || entry.prebrowse_interest,
+        ).length;
+        const guestMerchNotes = guest.filter((entry) => entry.merch_thoughts).length;
+        const guestPositiveBrowse = guest.filter((entry) =>
+          ["Yes - I'd definitely use that", "Probably - sounds handy"].includes(entry.prebrowse_interest),
+        ).length;
+        const guestMarketplaceInsights = [
+          `${guestMarketplaceCore} of ${guest.length} guests completed the core marketplace questions (${guest.length ? fmtPercent((guestMarketplaceCore / guest.length) * 100, 0) : "0%"} of this slice).`,
+          `${guestMerchNotes} guests left merch notes (${guest.length ? fmtPercent((guestMerchNotes / guest.length) * 100, 0) : "0%"}), while ${guest.length ? fmtPercent((guestPositiveBrowse / guest.length) * 100, 0) : "0%"} showed positive pre-browse appetite.`,
+        ];
+
+        const guestCommentInsights = [
+          `${guestCommentEntries.length} open-text comments are in view across ${guestQuoteConfig.filter((item) => item.field).length} guest prompts.`,
+        ];
+        if (guestCommentTop) {
+          guestCommentInsights.push(
+            `${guestCommentTop[0]} is the strongest comment theme, appearing across ${guestCommentTop[1]} prompt-level mentions in this slice.`,
+          );
+        }
+
+        const guestInsightMap = {
+          overview: overviewInsights.slice(0, 2),
+          narrative: guestCommentInsights.slice(0, 2),
+          marketplace: guestMarketplaceInsights.slice(0, 2),
+        };
+        const guestInsightTitle = {
+          overview: "Overview insight",
+          narrative: "Comment insight",
+          marketplace: "Marketplace insight",
+        };
+        renderInsightsPanel(
+          "guest-insights",
+          guestInsightTitle[state.guestSubview],
+          guestInsightMap[state.guestSubview] || [],
+        );
 
         const facilityMap = [
           ["Toilets availability", "facility_toilets_availability"],
@@ -1700,10 +1750,12 @@
           min: 0,
           max: undefined,
         });
+        const missedAnswered = guest.filter((entry) => entry.missed_purchase).length;
+        const missedTotal = missedOrder
+          .slice(1)
+          .reduce((sum, key) => sum + (missedCounts.get(key) || 0), 0);
         document.getElementById("guest-missed-summary").textContent =
-          `${missedOrder
-            .slice(1)
-            .reduce((sum, key) => sum + (missedCounts.get(key) || 0), 0)} guests reported at least one missed purchase.`;
+          `${missedTotal} of ${missedAnswered} marketplace responses reported at least one missed purchase.`;
 
         const prebrowseOrder = [
           "Yes - I'd definitely use that",
@@ -1717,14 +1769,11 @@
           prebrowseCounts,
           categoryColors.prebrowse,
         );
+        const prebrowseAnswered = guest.filter((entry) => entry.prebrowse_interest).length;
+        const positiveBrowse = (prebrowseCounts.get("Yes - I'd definitely use that") || 0) +
+          (prebrowseCounts.get("Probably - sounds handy") || 0);
         document.getElementById("guest-prebrowse-summary").textContent =
-          `${fmtPercent(
-            (((prebrowseCounts.get("Yes - I'd definitely use that") || 0) +
-              (prebrowseCounts.get("Probably - sounds handy") || 0)) /
-              (guest.length || 1)) *
-              100,
-            0,
-          )} showed positive interest in browsing vendors ahead of time.`;
+          `${prebrowseAnswered ? fmtPercent((positiveBrowse / prebrowseAnswered) * 100, 0) : "0%"} of ${prebrowseAnswered} responses showed positive browse interest.`;
 
         makeBarChart("guest-merch-chart", {
           labels: merchMentionData.map(([label]) => label),
@@ -1883,6 +1932,48 @@
         const commsAvg = average(vendor.map((entry) => entry.rating_comms));
         const adminAvg = average(vendor.map((entry) => entry.rating_admin));
         const locationAvg = average(vendor.map((entry) => entry.rating_location));
+        const vendorThemes = themeCountsFrom(vendor, detectVendorThemes);
+        const definiteVendors = vendor.filter((entry) => entry.return_intent === "Yes, definitely").length;
+        const vendorCommentEntries = getVendorResponses(vendor);
+        const vendorCommentThemes = themeCountsFrom(
+          vendorCommentEntries.map((entry) => ({ ...entry, __themes: entry.themes })),
+          (entry) => entry.__themes || ["General"],
+        );
+        const vendorCommentTop = vendorCommentThemes[0];
+        const vendorMarketplaceThoughtCount = vendor.filter((entry) => entry.marketplace_thoughts).length;
+        const vendorMarketplaceInterestCount = vendor.filter((entry) => entry.marketplace_interest).length;
+        const vendorPositiveMarketplaceCount = vendor.filter((entry) =>
+          ["Very interested - I'd want to be involved from the start", "Interested - tell me more"].includes(
+            entry.marketplace_interest,
+          ),
+        ).length;
+
+        const vendorInsightMap = {
+          overview: [
+            `Location remains the weakest vendor metric at ${fmtNumber(locationAvg, 2)} / 5, while comms still holds at ${fmtNumber(commsAvg, 2)} / 5.`,
+            `${definiteVendors} of ${vendor.length} vendors are already definite for 2027.`,
+          ],
+          narrative: [
+            `${vendorCommentEntries.length} vendor comments are in view across ${vendorResponseConfig.filter((item) => item.field && item.id !== "marketplace_thoughts").length} non-marketplace prompts.`,
+            vendorCommentTop
+              ? `${vendorCommentTop[0]} is the dominant vendor comment theme with ${vendorCommentTop[1]} theme mentions in this slice.`
+              : "No recurring vendor theme signal in this slice.",
+          ],
+          marketplace: [
+            `${vendorMarketplaceInterestCount} of ${vendor.length} vendors answered marketplace appetite (${vendor.length ? fmtPercent((vendorMarketplaceInterestCount / vendor.length) * 100, 0) : "0%"} of this slice).`,
+            `${vendorMarketplaceThoughtCount} vendors left marketplace comments, and ${vendorMarketplaceInterestCount ? fmtPercent((vendorPositiveMarketplaceCount / vendorMarketplaceInterestCount) * 100, 0) : "0%"} of respondents showed active appetite.`,
+          ],
+        };
+        const vendorInsightTitle = {
+          overview: "Overview insight",
+          narrative: "Comment insight",
+          marketplace: "Marketplace insight",
+        };
+        renderInsightsPanel(
+          "vendor-insights",
+          vendorInsightTitle[state.vendorSubview],
+          (vendorInsightMap[state.vendorSubview] || []).filter(Boolean),
+        );
 
         buildMetricCards("vendor-metrics", [
           {
@@ -1910,8 +2001,6 @@
             subnote: `${vendor.filter((entry) => typeof entry.rating_location === "number").length} scored responses`,
           },
         ]);
-
-        const vendorThemes = themeCountsFrom(vendor, detectVendorThemes);
         makeBarChart("vendor-theme-chart", {
           labels: vendorThemes.map(([label]) => label),
           values: vendorThemes.map(([, value]) => value),
@@ -2049,9 +2138,12 @@
           min: 0,
           max: undefined,
         });
+        const vendorInterestAnswered = vendor.filter((entry) => entry.marketplace_interest).length;
+        const vendorPositiveInterest =
+          (interestCounts.get("Very interested - I'd want to be involved from the start") || 0) +
+          (interestCounts.get("Interested - tell me more") || 0);
         document.getElementById("vendor-marketplace-summary").textContent =
-          `${(interestCounts.get("Very interested - I'd want to be involved from the start") || 0) +
-            (interestCounts.get("Interested - tell me more") || 0)} vendors showed active marketplace appetite.`;
+          `${vendorPositiveInterest} of ${vendorInterestAnswered} marketplace responses showed active appetite.`;
 
         renderFilterButtons(
           "vendor-response-filters",
