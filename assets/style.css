@@ -518,6 +518,10 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   min-height: 108px;
 }
 
+.chart-wrap--focus {
+  min-height: 148px;
+}
+
 .chart-wrap.ribbon {
   min-height: 92px;
 }
@@ -786,18 +790,20 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 .filter-chip {
   appearance: none;
   border: 1px solid rgba(24, 20, 31, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--muted);
-  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.68);
+  color: #5f5865;
+  border-radius: 10px;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .filter-chip[aria-pressed="true"] {
-  background: rgba(127, 119, 221, 0.12);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
-  border-color: rgba(127, 119, 221, 0.3);
+  border-color: rgba(24, 20, 31, 0.14);
 }
 
 .quotes-grid {
@@ -911,6 +917,10 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   max-height: 64vh;
   overflow: auto;
   padding-right: 2px;
+}
+
+.subview-panel[hidden] {
+  display: none !important;
 }
 
 .comment-group {
