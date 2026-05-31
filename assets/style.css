@@ -78,19 +78,17 @@ select {
   margin: 0 auto;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
+  align-items: center;
   gap: 12px;
   padding: 8px 0;
 }
 
 .topbar-context {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   justify-self: end;
-  justify-content: flex-end;
-  align-self: center;
-  max-width: 760px;
+  width: min(100%, 700px);
 }
 
 .brand {
@@ -128,7 +126,6 @@ select {
   display: grid;
   gap: 2px;
   padding: 5px 8px;
-  flex: 0 1 148px;
   min-width: 0;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.08);
@@ -853,6 +850,46 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   background: rgba(24, 20, 31, 0.04);
 }
 
+.writein-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.writein-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.writein-head strong {
+  font-size: 0.76rem;
+  color: #18151d;
+}
+
+.writein-head span {
+  color: #746d79;
+  font-size: 0.68rem;
+}
+
+.writein-scroll {
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.writein-item {
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: rgba(24, 20, 31, 0.04);
+  color: #3c3742;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 .compact-compare-head {
   display: flex;
   align-items: baseline;
@@ -1406,8 +1443,7 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 
   .topbar-context {
     width: 100%;
-    justify-content: flex-start;
-    max-width: none;
+    grid-template-columns: 1fr;
   }
 
   .dataset-switcher {

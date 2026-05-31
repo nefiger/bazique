@@ -143,6 +143,7 @@
                 <p class="chart-caption" id="guest-improvements-summary"></p>
                 <div class="compact-compare compact-compare--single" id="guest-improvements-breakdown">
                 </div>
+                <div class="writein-list" id="guest-improvements-custom"></div>
               </article>
             </div>
           </section>
@@ -318,6 +319,7 @@
                 <p class="chart-caption" id="vendor-improvements-summary"></p>
                 <div class="compact-compare compact-compare--single" id="vendor-improvements-breakdown">
                 </div>
+                <div class="writein-list" id="vendor-improvements-custom"></div>
               </article>
             </div>
           </section>
@@ -518,6 +520,25 @@
         ["Wristbands / bracelets", 6],
         ["Playlists / aftermovie", 5],
         ["Photo booth / polaroid", 4],
+      ];
+
+      const guestImprovementOptions = [
+        "More shade and seating",
+        "Better facilities",
+        "Bigger music programme",
+        "More food variety",
+        "Better signage and layout",
+        "More wellness options",
+        "More market vendors",
+      ];
+
+      const vendorImprovementOptions = [
+        "Guaranteed connectivity for payments",
+        "Better foot traffic past stalls",
+        "More pre-event marketing to festivalgoers",
+        "Fewer vendors (less competition)",
+        "Improved power infrastructure",
+        "Premium stall placement for an additional fee",
       ];
 
       const charts = new Map();
@@ -1275,19 +1296,40 @@
           .join("");
       }
 
+      function extractImprovementSignals(entries, field, knownOptions) {
+        const selectedCounts = new Map(knownOptions.map((option) => [option, 0]));
+        const customEntries = [];
+
+        entries.forEach((entry) => {
+          const raw = entry[field];
+          if (!raw) return;
+          const parts = parseMultiSelect(raw);
+          const selected = parts.filter((part) => knownOptions.includes(part));
+          const custom = parts.filter((part) => !knownOptions.includes(part));
+          selected.forEach((item) => selectedCounts.set(item, (selectedCounts.get(item) || 0) + 1));
+          if (custom.length) {
+            customEntries.push(custom.join(", "));
+          }
+        });
+
+        return {
+          selected: asEntries(selectedCounts).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]),
+          custom: customEntries,
+        };
+      }
+
       function renderTopbarContext(guest, guestRaw, vendor, vendorRaw) {
         const target = document.getElementById("topbar-context");
         let items = [];
 
         if (state.activeTab === "guest") {
           const overall = average(guest.map((entry) => entry.overall_rating));
-          const rated45 = guest.filter((entry) => entry.overall_rating >= 4).length;
-          const returnDefinite = guest.filter(
-            (entry) => entry.return_intent === "Definitely - already planning it",
+          const likelyReturn = guest.filter((entry) =>
+            ["Definitely - already planning it", "Very likely"].includes(entry.return_intent),
           ).length;
           items = [
             {
-              label: "Slice size",
+              label: "Total responses",
               value: `${guest.length} / ${guestRaw.length}`,
               note: "guest responses in view",
             },
@@ -1297,35 +1339,39 @@
               note: "average in current slice",
             },
             {
-              label: "Return profile",
-              value: `${guest.length ? fmtPercent((rated45 / guest.length) * 100, 0) : "0%"} high / ${guest.length ? fmtPercent((returnDefinite / guest.length) * 100, 0) : "0%"} definite`,
-              note: `${rated45} rated 4-5, ${returnDefinite} already planning 2027`,
+              label: "Likely to return",
+              value: `${guest.length ? fmtPercent((likelyReturn / guest.length) * 100, 0) : "0%"}`,
+              note: `${likelyReturn} very likely or definite`,
             },
           ];
         } else if (state.activeTab === "vendor") {
-          const commsAvg = average(vendor.map((entry) => entry.rating_comms));
-          const locationAvg = average(vendor.map((entry) => entry.rating_location));
-          const definite = vendor.filter((entry) => entry.return_intent === "Yes, definitely").length;
+          const overall = average(
+            vendor.flatMap((entry) => [
+              entry.rating_comms,
+              entry.rating_admin,
+              entry.rating_support,
+              entry.rating_infrastructure,
+              entry.rating_location,
+            ].filter((value) => typeof value === "number")),
+          );
+          const likelyReturn = vendor.filter((entry) =>
+            ["Yes, definitely", "Probably - depends on the details"].includes(entry.return_intent),
+          ).length;
           items = [
             {
-              label: "Slice size",
+              label: "Total responses",
               value: `${vendor.length} / ${vendorRaw.length}`,
               note: "vendor responses in view",
             },
             {
-              label: "Comms",
-              value: `${fmtNumber(commsAvg, 2)} / 5`,
-              note: "lead-up communication",
+              label: "Overall rating",
+              value: `${fmtNumber(overall, 2)} / 5`,
+              note: "across core vendor dimensions",
             },
             {
-              label: "Location",
-              value: `${fmtNumber(locationAvg, 2)} / 5`,
-              note: "foot traffic / placement",
-            },
-            {
-              label: "Return profile",
-              value: `${definite} definite`,
-              note: `${vendor.length - definite} depend on detail or unlikely`,
+              label: "Likely to return",
+              value: `${vendor.length ? fmtPercent((likelyReturn / vendor.length) * 100, 0) : "0%"}`,
+              note: `${likelyReturn} probably or definite`,
             },
           ];
         } else {
@@ -1790,23 +1836,27 @@
             .sort((a, b) => b.rating - a.rating)[0]
             .label} earned the strongest average rating.`;
 
-        const improvementCounts = new Map();
-        guest.forEach((entry) => {
-          parseMultiSelect(entry.improvements).forEach((item) => {
-            improvementCounts.set(item, (improvementCounts.get(item) || 0) + 1);
-          });
-        });
-        const sortedImprovements = asEntries(improvementCounts).sort((a, b) => b[1] - a[1]);
+        const guestImprovementSignals = extractImprovementSignals(
+          guest,
+          "improvements",
+          guestImprovementOptions,
+        );
+        const sortedImprovements = guestImprovementSignals.selected;
         document.getElementById("guest-improvements-summary").textContent =
           sortedImprovements.length
-            ? `${sortedImprovements[0][0]} was the most frequent guest request.`
+            ? `Selected options are ranked below. Write-in additions are shown separately.`
             : "No improvement responses in this slice.";
-        const guestImprovementMax = sortedImprovements[0]?.[1] || 1;
+        const guestImprovementRows = sortedImprovements.filter(([, value]) => value > 1).slice(0, 8);
+        const guestImprovementMax = guestImprovementRows[0]?.[1] || sortedImprovements[0]?.[1] || 1;
         document.getElementById("guest-improvements-breakdown").innerHTML = `
           <article class="compact-compare-card">
+            <div class="compact-compare-head">
+              <strong>Selected options</strong>
+              <span>${guestImprovementRows.length} recurring items</span>
+            </div>
             <div class="dist-list">
               ${buildMeterRows(
-                sortedImprovements.map(([label, value]) => ({
+                guestImprovementRows.map(([label, value]) => ({
                   label,
                   share: Math.round((value / guestImprovementMax) * 100),
                   value: String(value),
@@ -1818,6 +1868,19 @@
             </div>
           </article>
         `;
+        document.getElementById("guest-improvements-custom").innerHTML = guestImprovementSignals.custom.length
+          ? `
+            <div class="writein-head">
+              <strong>Write-in additions</strong>
+              <span>${guestImprovementSignals.custom.length} responses added extra detail</span>
+            </div>
+            <div class="writein-scroll">
+              ${guestImprovementSignals.custom
+                .map((text) => `<div class="writein-item">${escapeHtml(text)}</div>`)
+                .join("")}
+            </div>
+          `
+          : "";
 
         const missedOrder = ["No", "Yes, once", "Yes, more than once"];
         const missedCounts = countBy(guest, (entry) => entry.missed_purchase, missedOrder);
@@ -2122,23 +2185,27 @@
         document.getElementById("vendor-return-summary").textContent =
           `${vendorReturnCounts.get("Yes, definitely") || 0} vendors are already definite for 2027.`;
 
-        const vendorImprovementCounts = new Map();
-        vendor.forEach((entry) => {
-          parseMultiSelect(entry.improvements_2027).forEach((item) => {
-            vendorImprovementCounts.set(item, (vendorImprovementCounts.get(item) || 0) + 1);
-          });
-        });
-        const sortedVendorImprovements = asEntries(vendorImprovementCounts).sort((a, b) => b[1] - a[1]);
+        const vendorImprovementSignals = extractImprovementSignals(
+          vendor,
+          "improvements_2027",
+          vendorImprovementOptions,
+        );
+        const sortedVendorImprovements = vendorImprovementSignals.selected;
         document.getElementById("vendor-improvements-summary").textContent =
           sortedVendorImprovements.length
-            ? `${sortedVendorImprovements[0][0]} was the dominant vendor ask.`
+            ? `Selected options are ranked below. Write-in additions are shown separately.`
             : "No vendor improvement responses in this slice.";
-        const vendorImprovementMax = sortedVendorImprovements[0]?.[1] || 1;
+        const vendorImprovementRows = sortedVendorImprovements.filter(([, value]) => value > 1).slice(0, 8);
+        const vendorImprovementMax = vendorImprovementRows[0]?.[1] || sortedVendorImprovements[0]?.[1] || 1;
         document.getElementById("vendor-improvements-breakdown").innerHTML = `
           <article class="compact-compare-card">
+            <div class="compact-compare-head">
+              <strong>Selected options</strong>
+              <span>${vendorImprovementRows.length} recurring items</span>
+            </div>
             <div class="dist-list">
               ${buildMeterRows(
-                sortedVendorImprovements.map(([label, value]) => ({
+                vendorImprovementRows.map(([label, value]) => ({
                   label,
                   share: Math.round((value / vendorImprovementMax) * 100),
                   value: String(value),
@@ -2150,6 +2217,19 @@
             </div>
           </article>
         `;
+        document.getElementById("vendor-improvements-custom").innerHTML = vendorImprovementSignals.custom.length
+          ? `
+            <div class="writein-head">
+              <strong>Write-in additions</strong>
+              <span>${vendorImprovementSignals.custom.length} responses added extra detail</span>
+            </div>
+            <div class="writein-scroll">
+              ${vendorImprovementSignals.custom
+                .map((text) => `<div class="writein-item">${escapeHtml(text)}</div>`)
+                .join("")}
+            </div>
+          `
+          : "";
 
         const interestOrder = [
           "Very interested - I'd want to be involved from the start",
