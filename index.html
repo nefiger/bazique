@@ -203,8 +203,7 @@
                 <h3 class="chart-title">Missed purchase moments</h3>
               </div>
               <p class="chart-caption" id="guest-missed-summary"></p>
-              <div class="chart-wrap chart-wrap--marketplace">
-                <canvas id="guest-missed-chart" aria-label="Guest missed purchase moments"></canvas>
+              <div class="compact-compare compact-compare--single" id="guest-missed-breakdown">
               </div>
             </article>
 
@@ -213,8 +212,7 @@
                 <h3 class="chart-title">Pre-browse interest</h3>
               </div>
               <p class="chart-caption" id="guest-prebrowse-summary"></p>
-              <div class="chart-wrap chart-wrap--marketplace">
-                <canvas id="guest-prebrowse-chart" aria-label="Guest interest in pre-browsing vendors"></canvas>
+              <div class="compact-compare compact-compare--single" id="guest-prebrowse-breakdown">
               </div>
             </article>
           </div>
@@ -227,8 +225,7 @@
               Manual tagging from the guest merch-thought responses, supplied in the
               specification.
             </p>
-            <div class="chart-wrap chart-wrap--marketplace-wide">
-              <canvas id="guest-merch-chart" aria-label="Guest merch category mentions"></canvas>
+            <div class="compact-compare compact-compare--single" id="guest-merch-breakdown">
             </div>
           </article>
 
@@ -1817,19 +1814,32 @@
 
         const missedOrder = ["No", "Yes, once", "Yes, more than once"];
         const missedCounts = countBy(guest, (entry) => entry.missed_purchase, missedOrder);
-        makeBarChart("guest-missed-chart", {
-          labels: missedOrder,
-          values: missedOrder.map((value) => missedCounts.get(value) || 0),
-          color: [colors.teal, colors.amber, colors.coral],
-          min: 0,
-          max: undefined,
-        });
         const missedAnswered = guest.filter((entry) => entry.missed_purchase).length;
         const missedTotal = missedOrder
           .slice(1)
           .reduce((sum, key) => sum + (missedCounts.get(key) || 0), 0);
         document.getElementById("guest-missed-summary").textContent =
           `${missedTotal} of ${missedAnswered} marketplace responses reported at least one missed purchase.`;
+        document.getElementById("guest-missed-breakdown").innerHTML = `
+          <article class="compact-compare-card">
+            <div class="dist-list">
+              ${buildMeterRows(
+                missedOrder.map((label, index) => {
+                  const count = missedCounts.get(label) || 0;
+                  const share = missedAnswered ? Math.round((count / missedAnswered) * 100) : 0;
+                  return {
+                    label: index === 0 ? "No" : index === 1 ? "Once" : ">1",
+                    share,
+                    value: `${count} · ${share}%`,
+                    rowClass: "dist-row dist-row--compact",
+                    fillClass: [ "meter-fill--teal", "meter-fill--amber", "meter-fill--coral" ][index],
+                  };
+                }),
+                "meter-fill--teal",
+              )}
+            </div>
+          </article>
+        `;
 
         const prebrowseOrder = [
           "Yes - I'd definitely use that",
@@ -1837,26 +1847,60 @@
           "Not really - I enjoy discovering things on the day",
         ];
         const prebrowseCounts = countBy(guest, (entry) => entry.prebrowse_interest, prebrowseOrder);
-        makeStackedSingleBar(
-          "guest-prebrowse-chart",
-          prebrowseOrder,
-          prebrowseCounts,
-          categoryColors.prebrowse,
-        );
         const prebrowseAnswered = guest.filter((entry) => entry.prebrowse_interest).length;
         const positiveBrowse = (prebrowseCounts.get("Yes - I'd definitely use that") || 0) +
           (prebrowseCounts.get("Probably - sounds handy") || 0);
         document.getElementById("guest-prebrowse-summary").textContent =
           `${prebrowseAnswered ? fmtPercent((positiveBrowse / prebrowseAnswered) * 100, 0) : "0%"} of ${prebrowseAnswered} responses showed positive browse interest.`;
-
-        makeBarChart("guest-merch-chart", {
-          labels: merchMentionData.map(([label]) => label),
-          values: merchMentionData.map(([, value]) => value),
-          color: merchMentionData.map(() => colors.purple),
-          axis: "y",
-          min: 0,
-          max: undefined,
-        });
+        document.getElementById("guest-prebrowse-breakdown").innerHTML = `
+          <article class="compact-compare-card">
+            <div class="dist-list">
+              ${buildMeterRows(
+                [
+                  {
+                    label: "Yes",
+                    share: prebrowseAnswered ? Math.round(((prebrowseCounts.get("Yes - I'd definitely use that") || 0) / prebrowseAnswered) * 100) : 0,
+                    value: `${prebrowseCounts.get("Yes - I'd definitely use that") || 0}`,
+                    rowClass: "dist-row dist-row--compact",
+                    fillClass: "meter-fill--teal",
+                  },
+                  {
+                    label: "Prob",
+                    share: prebrowseAnswered ? Math.round(((prebrowseCounts.get("Probably - sounds handy") || 0) / prebrowseAnswered) * 100) : 0,
+                    value: `${prebrowseCounts.get("Probably - sounds handy") || 0}`,
+                    rowClass: "dist-row dist-row--compact",
+                    fillClass: "meter-fill--blue",
+                  },
+                  {
+                    label: "Day-of",
+                    share: prebrowseAnswered ? Math.round(((prebrowseCounts.get("Not really - I enjoy discovering things on the day") || 0) / prebrowseAnswered) * 100) : 0,
+                    value: `${prebrowseCounts.get("Not really - I enjoy discovering things on the day") || 0}`,
+                    rowClass: "dist-row dist-row--compact",
+                    fillClass: "meter-fill--amber",
+                  },
+                ],
+                "meter-fill--teal",
+              )}
+            </div>
+          </article>
+        `;
+        const merchMax = merchMentionData[0]?.[1] || 1;
+        document.getElementById("guest-merch-breakdown").innerHTML = `
+          <article class="compact-compare-card">
+            <div class="dist-list">
+              ${buildMeterRows(
+                merchMentionData.map(([label, value]) => ({
+                  label,
+                  share: Math.round((value / merchMax) * 100),
+                  value: String(value),
+                  rowClass: "dist-row dist-row--merch",
+                  fillClass: "meter-fill--purple",
+                })),
+                "meter-fill--purple",
+              )}
+            </div>
+          </article>
+        `;
 
         renderMarketplaceNotes(
           "guest-merch-notes",
