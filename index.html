@@ -141,8 +141,7 @@
               </div>
               <article class="chart-card chart-card--tight">
                 <p class="chart-caption" id="guest-improvements-summary"></p>
-                <div class="chart-wrap chart-wrap--focus">
-                  <canvas id="guest-improvements-chart" aria-label="Guest improvement ideas for 2027"></canvas>
+                <div class="compact-compare compact-compare--single" id="guest-improvements-breakdown">
                 </div>
               </article>
             </div>
@@ -317,8 +316,7 @@
               </div>
               <article class="chart-card chart-card--tight">
                 <p class="chart-caption" id="vendor-improvements-summary"></p>
-                <div class="chart-wrap chart-wrap--focus">
-                  <canvas id="vendor-improvements-chart" aria-label="Vendor improvement requests for 2027"></canvas>
+                <div class="compact-compare compact-compare--single" id="vendor-improvements-breakdown">
                 </div>
               </article>
             </div>
@@ -1799,18 +1797,27 @@
           });
         });
         const sortedImprovements = asEntries(improvementCounts).sort((a, b) => b[1] - a[1]);
-        makeBarChart("guest-improvements-chart", {
-          labels: sortedImprovements.map(([label]) => label),
-          values: sortedImprovements.map(([, value]) => value),
-          color: sortedImprovements.map(() => colors.teal),
-          axis: "y",
-          min: 0,
-          max: undefined,
-        });
         document.getElementById("guest-improvements-summary").textContent =
           sortedImprovements.length
             ? `${sortedImprovements[0][0]} was the most frequent guest request.`
             : "No improvement responses in this slice.";
+        const guestImprovementMax = sortedImprovements[0]?.[1] || 1;
+        document.getElementById("guest-improvements-breakdown").innerHTML = `
+          <article class="compact-compare-card">
+            <div class="dist-list">
+              ${buildMeterRows(
+                sortedImprovements.map(([label, value]) => ({
+                  label,
+                  share: Math.round((value / guestImprovementMax) * 100),
+                  value: String(value),
+                  rowClass: "dist-row dist-row--merch",
+                  fillClass: "meter-fill--teal",
+                })),
+                "meter-fill--teal",
+              )}
+            </div>
+          </article>
+        `;
 
         const missedOrder = ["No", "Yes, once", "Yes, more than once"];
         const missedCounts = countBy(guest, (entry) => entry.missed_purchase, missedOrder);
@@ -2122,18 +2129,27 @@
           });
         });
         const sortedVendorImprovements = asEntries(vendorImprovementCounts).sort((a, b) => b[1] - a[1]);
-        makeBarChart("vendor-improvements-chart", {
-          labels: sortedVendorImprovements.map(([label]) => label),
-          values: sortedVendorImprovements.map(([, value]) => value),
-          color: sortedVendorImprovements.map(() => colors.tealDeep),
-          axis: "y",
-          min: 0,
-          max: undefined,
-        });
         document.getElementById("vendor-improvements-summary").textContent =
           sortedVendorImprovements.length
             ? `${sortedVendorImprovements[0][0]} was the dominant vendor ask.`
             : "No vendor improvement responses in this slice.";
+        const vendorImprovementMax = sortedVendorImprovements[0]?.[1] || 1;
+        document.getElementById("vendor-improvements-breakdown").innerHTML = `
+          <article class="compact-compare-card">
+            <div class="dist-list">
+              ${buildMeterRows(
+                sortedVendorImprovements.map(([label, value]) => ({
+                  label,
+                  share: Math.round((value / vendorImprovementMax) * 100),
+                  value: String(value),
+                  rowClass: "dist-row dist-row--merch",
+                  fillClass: "meter-fill--teal",
+                })),
+                "meter-fill--teal",
+              )}
+            </div>
+          </article>
+        `;
 
         const interestOrder = [
           "Very interested - I'd want to be involved from the start",
