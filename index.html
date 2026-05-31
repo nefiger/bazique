@@ -77,17 +77,9 @@
         aria-labelledby="tab-guest"
       >
         <section class="control-bar">
-          <div class="control-summary">
-            <div class="control-summary-copy">
-              <span class="dataset-badge dataset-badge--guest">Guest feedback</span>
-              <span class="control-kicker">Current slice</span>
-              <strong id="guest-slice-summary">All guest responses</strong>
-            </div>
-          </div>
           <div class="control-grid" id="guest-controls"></div>
           <div class="subview-bar">
             <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
-            <p class="subview-help" id="guest-subview-help"></p>
           </div>
           <div class="insights-note" aria-label="Guest slice insights">
             <span class="insights-label">Observed in current slice</span>
@@ -239,15 +231,10 @@
         hidden
       >
         <section class="control-bar">
-          <div class="control-summary">
-            <div class="control-summary-copy">
-              <span class="dataset-badge dataset-badge--vendor">Vendor feedback</span>
-              <span class="control-kicker">Current slice</span>
-              <strong id="vendor-slice-summary">All vendor responses</strong>
-            </div>
-          </div>
           <div class="control-grid" id="vendor-controls"></div>
-          <div class="subview-tabs" id="vendor-subviews" aria-label="Vendor subviews"></div>
+          <div class="subview-bar">
+            <div class="subview-tabs" id="vendor-subviews" aria-label="Vendor subviews"></div>
+          </div>
         </section>
 
         <section class="subview-panel" data-panel-group="vendor" data-subview-panel="overview">
@@ -966,7 +953,6 @@
 
       function renderSubviewTabs(targetId, helpId, items, activeId, onClick) {
         const target = document.getElementById(targetId);
-        const help = helpId ? document.getElementById(helpId) : null;
         target.innerHTML = "";
         items.forEach((item) => {
           const button = document.createElement("button");
@@ -980,10 +966,6 @@
           button.addEventListener("click", () => onClick(item.id));
           target.appendChild(button);
         });
-        if (help) {
-          const active = items.find((item) => item.id === activeId);
-          help.textContent = active && active.description ? active.description : "";
-        }
       }
 
       function renderSubviewPanels(group, activeId) {
@@ -1302,7 +1284,7 @@
       function renderGuestSection(guest, guestRaw) {
         renderSubviewTabs(
           "guest-subviews",
-          "guest-subview-help",
+          null,
           [
             { id: "overview", label: "Overview", description: "Core ratings, movement, facilities, and improvement signals for the active slice." },
             { id: "narrative", label: "Comments", description: "Grouped open-text responses by prompt and semantic theme inside the current filtered slice." },
@@ -1379,8 +1361,6 @@
             },
           },
         ]);
-        document.getElementById("guest-slice-summary").textContent =
-          `${guest.length} of ${guestRaw.length} guest responses in view`;
 
         const rated45 = guest.filter((entry) => entry.overall_rating >= 4).length;
         const returnDefinite = guest.filter(
@@ -1433,7 +1413,7 @@
         }
 
         document.getElementById("guest-insights").innerHTML = insights
-          .slice(0, 3)
+          .slice(0, 2)
           .map((text) => `<span class="insight-inline-item">${escapeHtml(text)}</span>`)
           .join("");
 
@@ -1689,8 +1669,6 @@
             },
           },
         ]);
-        document.getElementById("vendor-slice-summary").textContent =
-          `${vendor.length} of ${vendorRaw.length} vendor responses in view`;
 
         const responseRate = (vendor.length / 31) * 100;
         const commsAvg = average(vendor.map((entry) => entry.rating_comms));
