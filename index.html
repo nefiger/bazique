@@ -78,15 +78,21 @@
       >
         <section class="control-bar">
           <div class="control-grid" id="guest-controls"></div>
-          <div class="subview-bar">
-            <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
-          </div>
-          <div class="insights-note" aria-label="Guest slice insights">
-            <span class="insights-label">Observed in current slice</span>
-            <div class="insights-inline" id="guest-insights"></div>
-          </div>
         </section>
 
+        <section class="panel-layout">
+          <aside class="explorer-sidebar">
+            <div class="sidebar-card">
+              <span class="sidebar-label">Workspace</span>
+              <div class="subview-tabs subview-tabs--stack" id="guest-subviews" aria-label="Guest subviews"></div>
+            </div>
+            <div class="sidebar-card sidebar-card--notes">
+              <span class="sidebar-label">Observed In Slice</span>
+              <div class="insights-inline" id="guest-insights"></div>
+            </div>
+          </aside>
+
+          <div class="panel-main">
         <section class="subview-panel" data-panel-group="guest" data-subview-panel="overview">
           <section class="story-stack">
             <div class="story-group">
@@ -221,6 +227,8 @@
             </div>
           </article>
         </section>
+          </div>
+        </section>
       </section>
 
       <section
@@ -232,11 +240,25 @@
       >
         <section class="control-bar">
           <div class="control-grid" id="vendor-controls"></div>
-          <div class="subview-bar">
-            <div class="subview-tabs" id="vendor-subviews" aria-label="Vendor subviews"></div>
-          </div>
         </section>
 
+        <section class="panel-layout">
+          <aside class="explorer-sidebar">
+            <div class="sidebar-card">
+              <span class="sidebar-label">Workspace</span>
+              <div class="subview-tabs subview-tabs--stack" id="vendor-subviews" aria-label="Vendor subviews"></div>
+            </div>
+            <div class="sidebar-card sidebar-card--notes">
+              <span class="sidebar-label">Use This View For</span>
+              <div class="insights-inline">
+                <span class="insight-inline-item">Overview focuses on ratings and operational pressure points.</span>
+                <span class="insight-inline-item">Comments groups open-text responses by theme and prompt.</span>
+                <span class="insight-inline-item">Marketplace isolates appetite and related vendor commentary.</span>
+              </div>
+            </div>
+          </aside>
+
+          <div class="panel-main">
         <section class="subview-panel" data-panel-group="vendor" data-subview-panel="overview">
           <section class="overview-ribbon">
             <div class="metric-ribbon" id="vendor-metrics"></div>
@@ -372,6 +394,8 @@
           <button class="show-more" id="vendor-marketplace-show-more" type="button">
             Show more marketplace comments
           </button>
+        </section>
+          </div>
         </section>
       </section>
 
