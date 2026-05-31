@@ -594,6 +594,10 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   background: linear-gradient(90deg, rgba(55, 138, 221, 0.86), rgba(127, 119, 221, 0.92));
 }
 
+.meter-fill--coral {
+  background: linear-gradient(90deg, rgba(216, 90, 48, 0.92), rgba(239, 159, 39, 0.86));
+}
+
 .intent-bar {
   display: flex;
   min-height: 18px;
@@ -817,6 +821,53 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 
 .quotes-grid--dense {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.quotes-grid--scroll {
+  max-height: 340px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.compact-compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.compact-compare-card {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(24, 20, 31, 0.04);
+}
+
+.compact-compare-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.compact-compare-head strong {
+  font-size: 0.76rem;
+  color: #18151d;
+}
+
+.compact-compare-head span {
+  color: #746d79;
+  font-size: 0.68rem;
+}
+
+.dist-row--compact {
+  grid-template-columns: 58px minmax(0, 1fr) 64px;
+  gap: 7px;
+}
+
+.dist-row--compact .dist-label,
+.dist-row--compact .dist-value {
+  font-size: 0.68rem;
 }
 
 .quote-card {

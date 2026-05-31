@@ -258,31 +258,6 @@
         </section>
 
         <section class="subview-panel" data-panel-group="vendor" data-subview-panel="overview">
-          <section class="overview-ribbon">
-            <div class="metric-ribbon" id="vendor-metrics"></div>
-            <div class="headline-strip">
-              <article class="headline-module">
-                <div class="panel-head panel-head--tight">
-                  <h3>Operational theme mix</h3>
-                  <p>What the active subset is struggling with.</p>
-                </div>
-                <div class="chart-wrap ribbon">
-                  <canvas id="vendor-theme-chart" aria-label="Vendor semantic theme mix"></canvas>
-                </div>
-              </article>
-
-              <article class="headline-module">
-                <div class="panel-head panel-head--tight">
-                  <h3>Type x marketplace appetite</h3>
-                  <p>Food and non-food vendors compared side by side.</p>
-                </div>
-                <div class="chart-wrap ribbon">
-                  <canvas id="vendor-type-marketplace-chart" aria-label="Vendor type by marketplace interest"></canvas>
-                </div>
-              </article>
-            </div>
-          </section>
-
           <section class="story-stack">
             <div class="story-group">
               <div class="story-head">
@@ -323,6 +298,19 @@
                   </div>
                 </article>
               </div>
+            </div>
+
+            <div class="story-group">
+              <div class="story-head">
+                <h3>Operational theme mix</h3>
+                <p>Which issues dominate the active vendor slice.</p>
+              </div>
+              <article class="chart-card chart-card--tight">
+                <p class="chart-caption" id="vendor-theme-summary"></p>
+                <div class="chart-wrap compact">
+                  <canvas id="vendor-theme-chart" aria-label="Vendor semantic theme mix"></canvas>
+                </div>
+              </article>
             </div>
 
             <div class="story-group">
@@ -402,15 +390,23 @@
 
             <article class="chart-card chart-card--tight">
               <div class="chart-head">
-                <h3 class="chart-title">Marketplace comment filter</h3>
+                <h3 class="chart-title">Type x appetite</h3>
               </div>
-              <p class="chart-caption">Toggle between all, interested, and hesitant vendor comments.</p>
-              <div class="filter-row" id="vendor-marketplace-filters" aria-label="Vendor marketplace thought filters"></div>
-              <p class="microcopy" id="vendor-marketplace-count"></p>
+              <p class="chart-caption" id="vendor-type-marketplace-summary"></p>
+              <div class="compact-compare" id="vendor-type-marketplace-compare"></div>
             </article>
           </div>
 
-          <div class="quotes-grid quotes-grid--dense" id="vendor-marketplace-cards"></div>
+          <article class="chart-card chart-card--tight">
+            <div class="chart-head">
+              <h3 class="chart-title">Marketplace comment filter</h3>
+            </div>
+            <p class="chart-caption">Toggle between all, interested, and hesitant vendor comments.</p>
+            <div class="filter-row" id="vendor-marketplace-filters" aria-label="Vendor marketplace thought filters"></div>
+            <p class="microcopy" id="vendor-marketplace-count"></p>
+          </article>
+
+          <div class="quotes-grid quotes-grid--dense quotes-grid--scroll" id="vendor-marketplace-cards"></div>
           <button class="show-more" id="vendor-marketplace-show-more" type="button">
             Show more marketplace comments
           </button>
@@ -1213,13 +1209,70 @@
         `;
       }
 
+      function renderVendorMarketplaceTypeCompare(targetId, vendor) {
+        const target = document.getElementById(targetId);
+        const types = ["Food", "Non-food"];
+        const appetiteGroups = [
+          {
+            label: "Active",
+            keys: [
+              "Very interested - I'd want to be involved from the start",
+              "Interested - tell me more",
+            ],
+            className: "meter-fill--teal",
+          },
+          {
+            label: "Unsure",
+            keys: ["Not sure - depends on how it works"],
+            className: "meter-fill--amber",
+          },
+          {
+            label: "Not for me",
+            keys: ["Not for me"],
+            className: "meter-fill--coral",
+          },
+        ];
+
+        target.innerHTML = types
+          .map((type) => {
+            const items = vendor.filter((entry) => entry.type === type && entry.marketplace_interest);
+            const total = items.length || 1;
+            const rows = appetiteGroups.map((group) => {
+              const count = items.filter((entry) => group.keys.includes(entry.marketplace_interest)).length;
+              const share = items.length ? Math.round((count / items.length) * 100) : 0;
+              return {
+                label: group.label,
+                share,
+                value: `${count} · ${share}%`,
+                rowClass: "dist-row dist-row--compact",
+                labelClass: "dist-label",
+                valueClass: "dist-value",
+                fillClass: group.className,
+              };
+            });
+
+            return `
+              <article class="compact-compare-card">
+                <div class="compact-compare-head">
+                  <strong>${escapeHtml(type)}</strong>
+                  <span>${items.length} responses</span>
+                </div>
+                <div class="dist-list">
+                  ${buildMeterRows(rows, "meter-fill--teal")}
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
       function buildMeterRows(items, fillClass) {
         return items
           .map(
             (item) => `
               <div class="${escapeHtml(item.rowClass || "dist-row")}">
                 <span class="${escapeHtml(item.labelClass || "dist-label")}">${escapeHtml(item.label)}</span>
-                <span class="meter-track"><span class="meter-fill ${escapeHtml(fillClass)}" style="width:${item.share}%"></span></span>
+                <span class="meter-track"><span class="meter-fill ${escapeHtml(item.fillClass || fillClass)}" style="width:${item.share}%"></span></span>
                 <span class="${escapeHtml(item.valueClass || "dist-value")}">${escapeHtml(item.value)}</span>
               </div>
             `,
@@ -1916,7 +1969,6 @@
           },
         ]);
 
-        const responseRate = (vendor.length / 31) * 100;
         const commsAvg = average(vendor.map((entry) => entry.rating_comms));
         const adminAvg = average(vendor.map((entry) => entry.rating_admin));
         const locationAvg = average(vendor.map((entry) => entry.rating_location));
@@ -1962,33 +2014,6 @@
           vendorInsightTitle[state.vendorSubview],
           (vendorInsightMap[state.vendorSubview] || []).filter(Boolean),
         );
-
-        buildMetricCards("vendor-metrics", [
-          {
-            label: "Responses",
-            value: `${vendor.length} of 31`,
-            note: `${fmtPercent(responseRate, 0)} response rate`,
-            subnote: `${vendorRaw.length} total vendor records available`,
-          },
-          {
-            label: "Comms rating",
-            value: `${fmtNumber(commsAvg, 2)} / 5`,
-            note: "Lead-up communication",
-            subnote: `${vendor.filter((entry) => typeof entry.rating_comms === "number").length} scored responses`,
-          },
-          {
-            label: "Admin rating",
-            value: `${fmtNumber(adminAvg, 2)} / 5`,
-            note: "Onboarding and admin process",
-            subnote: `${vendor.filter((entry) => typeof entry.rating_admin === "number").length} scored responses`,
-          },
-          {
-            label: "Location / foot traffic",
-            value: `${fmtNumber(locationAvg, 2)} / 5`,
-            note: "Weakest vendor score in the dataset",
-            subnote: `${vendor.filter((entry) => typeof entry.rating_location === "number").length} scored responses`,
-          },
-        ]);
         makeBarChart("vendor-theme-chart", {
           labels: vendorThemes.map(([label]) => label),
           values: vendorThemes.map(([, value]) => value),
@@ -1997,55 +2022,10 @@
           min: 0,
           max: undefined,
         });
-
-        createChart("vendor-type-marketplace-chart", {
-          type: "bar",
-          data: {
-            labels: ["Food", "Non-food"],
-            datasets: [
-              {
-                label: "Very interested / interested",
-                data: [
-                  vendor.filter((entry) => entry.type === "Food" && ["Very interested - I'd want to be involved from the start", "Interested - tell me more"].includes(entry.marketplace_interest)).length,
-                  vendor.filter((entry) => entry.type === "Non-food" && ["Very interested - I'd want to be involved from the start", "Interested - tell me more"].includes(entry.marketplace_interest)).length,
-                ],
-                backgroundColor: colors.teal,
-                borderRadius: 6,
-                categoryPercentage: 0.72,
-                barPercentage: 0.84,
-              },
-              {
-                label: "Not sure",
-                data: [
-                  vendor.filter((entry) => entry.type === "Food" && entry.marketplace_interest === "Not sure - depends on how it works").length,
-                  vendor.filter((entry) => entry.type === "Non-food" && entry.marketplace_interest === "Not sure - depends on how it works").length,
-                ],
-                backgroundColor: colors.amber,
-                borderRadius: 6,
-                categoryPercentage: 0.72,
-                barPercentage: 0.84,
-              },
-              {
-                label: "Not for me",
-                data: [
-                  vendor.filter((entry) => entry.type === "Food" && entry.marketplace_interest === "Not for me").length,
-                  vendor.filter((entry) => entry.type === "Non-food" && entry.marketplace_interest === "Not for me").length,
-                ],
-                backgroundColor: colors.coral,
-                borderRadius: 6,
-                categoryPercentage: 0.72,
-                barPercentage: 0.84,
-              },
-            ],
-          },
-          options: baseChartOptions({
-            plugins: { legend: { position: "bottom" } },
-            scales: {
-              x: { stacked: true, ticks: { color: colors.muted, font: { size: 11 }, padding: 4 }, grid: { color: "rgba(34,34,34,0.06)", lineWidth: 0.7 }, border: { color: "rgba(34,34,34,0.12)" } },
-              y: { stacked: true, ticks: { color: colors.ink, font: { size: 11 }, padding: 4 }, grid: { color: "rgba(34,34,34,0.06)", lineWidth: 0.7 }, border: { display: false } },
-            },
-          }),
-        });
+        document.getElementById("vendor-theme-summary").textContent =
+          vendorThemes.length
+            ? `${vendorThemes[0][0]} is the strongest operational theme in this slice.`
+            : "No recurring operational theme signal in this slice.";
 
         const vendorRatings = [
           ["Communication", commsAvg],
@@ -2132,6 +2112,9 @@
           (interestCounts.get("Interested - tell me more") || 0);
         document.getElementById("vendor-marketplace-summary").textContent =
           `${vendorPositiveInterest} of ${vendorInterestAnswered} marketplace responses showed active appetite.`;
+        renderVendorMarketplaceTypeCompare("vendor-type-marketplace-compare", vendor);
+        document.getElementById("vendor-type-marketplace-summary").textContent =
+          "Food and non-food vendors are compared by active appetite, uncertainty, and opt-out.";
 
         renderFilterButtons(
           "vendor-response-filters",
