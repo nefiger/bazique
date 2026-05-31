@@ -203,7 +203,7 @@
                 <h3 class="chart-title">Missed purchase moments</h3>
               </div>
               <p class="chart-caption" id="guest-missed-summary"></p>
-              <div class="chart-wrap compact">
+              <div class="chart-wrap chart-wrap--marketplace">
                 <canvas id="guest-missed-chart" aria-label="Guest missed purchase moments"></canvas>
               </div>
             </article>
@@ -213,7 +213,7 @@
                 <h3 class="chart-title">Pre-browse interest</h3>
               </div>
               <p class="chart-caption" id="guest-prebrowse-summary"></p>
-              <div class="chart-wrap compact">
+              <div class="chart-wrap chart-wrap--marketplace">
                 <canvas id="guest-prebrowse-chart" aria-label="Guest interest in pre-browsing vendors"></canvas>
               </div>
             </article>
@@ -227,7 +227,7 @@
               Manual tagging from the guest merch-thought responses, supplied in the
               specification.
             </p>
-            <div class="chart-wrap">
+            <div class="chart-wrap chart-wrap--marketplace-wide">
               <canvas id="guest-merch-chart" aria-label="Guest merch category mentions"></canvas>
             </div>
           </article>
@@ -237,10 +237,7 @@
               <h3>Merch notes</h3>
               <p id="guest-merch-notes-count"></p>
             </div>
-            <div class="quotes-grid" id="guest-merch-notes"></div>
-            <button class="show-more" id="guest-merch-notes-show-more" type="button">
-              Show more merch notes
-            </button>
+            <div class="marketplace-notes-scroll" id="guest-merch-notes"></div>
           </section>
         </section>
       </section>
@@ -398,7 +395,7 @@
                 <h3 class="chart-title">Marketplace interest</h3>
               </div>
               <p class="chart-caption" id="vendor-marketplace-summary"></p>
-              <div class="chart-wrap compact">
+              <div class="chart-wrap chart-wrap--marketplace">
                 <canvas id="vendor-marketplace-chart" aria-label="Vendor marketplace interest"></canvas>
               </div>
             </article>
@@ -1136,6 +1133,30 @@
           .join("");
       }
 
+      function renderMarketplaceNotes(targetId, countId, entries, emptyMessage) {
+        const target = document.getElementById(targetId);
+        const count = document.getElementById(countId);
+        count.textContent = `${entries.length} merch-note responses in this view`;
+
+        if (!entries.length) {
+          target.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+          return;
+        }
+
+        target.innerHTML = entries
+          .map(
+            (entry) => `
+              <article class="quote-card quote-card--marketplace">
+                <div class="quote-meta">
+                  <span>Merch note</span>
+                </div>
+                <p>${escapeHtml(entry.text)}</p>
+              </article>
+            `,
+          )
+          .join("");
+      }
+
       function escapeHtml(value) {
         return value
           .replaceAll("&", "&amp;")
@@ -1784,49 +1805,16 @@
           max: undefined,
         });
 
-        renderQuoteCards({
-          targetId: "guest-merch-notes",
-          countId: "guest-merch-notes-count",
-          buttonId: "guest-merch-notes-show-more",
-          entries: guest
+        renderMarketplaceNotes(
+          "guest-merch-notes",
+          "guest-merch-notes-count",
+          guest
             .filter((entry) => entry.merch_thoughts)
             .map((entry) => ({
-              label: "Merch thoughts",
               text: entry.merch_thoughts,
-              themes: detectGuestThemes(entry),
             })),
-          visible: 6,
-          makeMeta: (entry) => `
-            <span>${escapeHtml(entry.label)}</span>
-            <div class="theme-chip-row">
-              ${entry.themes.slice(0, 2).map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`).join("")}
-            </div>
-          `,
-          emptyMessage: "No merch notes in this slice.",
-          onShowMore: () => {
-            renderQuoteCards({
-              targetId: "guest-merch-notes",
-              countId: "guest-merch-notes-count",
-              buttonId: "guest-merch-notes-show-more",
-              entries: guest
-                .filter((entry) => entry.merch_thoughts)
-                .map((entry) => ({
-                  label: "Merch thoughts",
-                  text: entry.merch_thoughts,
-                  themes: detectGuestThemes(entry),
-                })),
-              visible: guest.filter((entry) => entry.merch_thoughts).length,
-              makeMeta: (entry) => `
-                <span>${escapeHtml(entry.label)}</span>
-                <div class="theme-chip-row">
-                  ${entry.themes.slice(0, 2).map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`).join("")}
-                </div>
-              `,
-              emptyMessage: "No merch notes in this slice.",
-              onShowMore: () => {},
-            });
-          },
-        });
+          "No merch notes in this slice.",
+        );
 
         renderFilterButtons("guest-quote-filters", guestQuoteConfig, state.guestQuoteFilter, (id) => {
           state.guestQuoteFilter = id;
