@@ -19,13 +19,6 @@
   <body data-view="guest">
     <header class="topbar">
       <div class="topbar-inner">
-        <a class="brand" href="#top">
-          <img class="brand-logo" src="./assets/bazique-logo.svg" alt="" />
-          <span class="brand-copy">
-            <span class="brand-title">Bazique 2026</span>
-            <span class="brand-subtitle">Feedback dashboard</span>
-          </span>
-        </a>
         <section class="dataset-switcher" role="tablist" aria-label="Dataset views">
           <button
             class="dataset-switch-button"
@@ -165,6 +158,34 @@
             <p>Grouped open-text responses in the current slice.</p>
           </div>
 
+          <div class="chart-grid two-col comments-workbench">
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Theme frequency</h3>
+              </div>
+              <p class="chart-caption" id="guest-comment-theme-summary"></p>
+              <div class="chart-wrap compact">
+                <canvas id="guest-comment-theme-chart" aria-label="Guest comment theme frequency"></canvas>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Prompt x theme</h3>
+              </div>
+              <p class="chart-caption" id="guest-comment-matrix-summary"></p>
+              <div class="matrix-grid" id="guest-comment-matrix"></div>
+            </article>
+          </div>
+
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Term cloud</h3>
+            </div>
+            <p class="chart-caption" id="guest-comment-cloud-summary"></p>
+            <div class="term-cloud" id="guest-comment-cloud"></div>
+          </article>
+
           <div class="filter-block">
             <div class="filter-row" id="guest-quote-filters" aria-label="Guest quote filters"></div>
             <p class="microcopy" id="guest-quote-count"></p>
@@ -213,6 +234,17 @@
               <canvas id="guest-merch-chart" aria-label="Guest merch category mentions"></canvas>
             </div>
           </article>
+
+          <section class="marketplace-notes">
+            <div class="subsection-head subsection-head--compact">
+              <h3>Merch notes</h3>
+              <p id="guest-merch-notes-count"></p>
+            </div>
+            <div class="quotes-grid" id="guest-merch-notes"></div>
+            <button class="show-more" id="guest-merch-notes-show-more" type="button">
+              Show more merch notes
+            </button>
+          </section>
         </section>
       </section>
 
@@ -318,6 +350,34 @@
             <h3>Comments</h3>
             <p>Grouped vendor responses within the active trading slice.</p>
           </div>
+
+          <div class="chart-grid two-col comments-workbench">
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Theme frequency</h3>
+              </div>
+              <p class="chart-caption" id="vendor-comment-theme-summary"></p>
+              <div class="chart-wrap compact">
+                <canvas id="vendor-comment-theme-chart" aria-label="Vendor comment theme frequency"></canvas>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="chart-head">
+                <h3 class="chart-title">Prompt x theme</h3>
+              </div>
+              <p class="chart-caption" id="vendor-comment-matrix-summary"></p>
+              <div class="matrix-grid" id="vendor-comment-matrix"></div>
+            </article>
+          </div>
+
+          <article class="chart-card">
+            <div class="chart-head">
+              <h3 class="chart-title">Term cloud</h3>
+            </div>
+            <p class="chart-caption" id="vendor-comment-cloud-summary"></p>
+            <div class="term-cloud" id="vendor-comment-cloud"></div>
+          </article>
 
           <div class="filter-block">
             <div class="filter-row" id="vendor-response-filters" aria-label="Vendor response filters"></div>
@@ -430,8 +490,8 @@
       </section>
 
       <p class="footer-note">
-        Built as a static dashboard from cleaned survey exports only. No backend, no
-        local storage, and no raw spreadsheet data committed to git.
+        Data sourced from feedback forms completed by guests and vendors. Responses
+        have been cleaned and anonymised to protect participant privacy.
       </p>
     </main>
 
@@ -485,13 +545,11 @@
         guestRatingFilter: "all",
         guestReturnFilter: "all",
         guestCommerceFilter: "all",
-        guestThemeFilter: "all",
         guestQuoteFilter: "all",
         vendorWifiFilter: "all",
         vendorInterestFilter: "all",
         vendorResponseFilter: "all",
         vendorTypeFilter: "all",
-        vendorThemeFilter: "all",
         vendorMarketplaceFilter: "all",
         vendorMarketplaceVisible: 12,
       };
@@ -869,6 +927,134 @@
           .sort((a, b) => b.items.length - a.items.length);
       }
 
+      function extractTopTerms(entries, limit = 18) {
+        const stopwords = new Set([
+          "the", "and", "for", "that", "with", "this", "from", "have", "they", "them",
+          "just", "more", "very", "really", "were", "was", "what", "when", "would", "there",
+          "about", "because", "into", "than", "your", "our", "their", "then", "them", "some",
+          "still", "been", "being", "also", "only", "over", "under", "while", "where", "which",
+          "could", "should", "after", "before", "again", "much", "many", "like", "feel", "felt",
+          "bazique", "festival", "guests", "guest", "vendors", "vendor",
+        ]);
+
+        const counts = new Map();
+        entries.forEach((entry) => {
+          entry.text
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, " ")
+            .split(/\s+/)
+            .filter((word) => word.length >= 4 && !stopwords.has(word))
+            .forEach((word) => counts.set(word, (counts.get(word) || 0) + 1));
+        });
+
+        return Array.from(counts.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, limit);
+      }
+
+      function renderTermCloud(targetId, terms) {
+        const target = document.getElementById(targetId);
+        if (!terms.length) {
+          target.innerHTML = `<div class="empty-state">No recurring terms in this view.</div>`;
+          return;
+        }
+
+        const max = terms[0][1] || 1;
+        target.innerHTML = terms
+          .map(([term, count]) => {
+            const size = 0.72 + ((count / max) * 0.42);
+            return `<span class="term-chip" style="font-size:${size.toFixed(2)}rem">${escapeHtml(term)} <strong>${count}</strong></span>`;
+          })
+          .join("");
+      }
+
+      function renderCommentMatrix(targetId, entries, summaryId) {
+        const target = document.getElementById(targetId);
+        const summary = document.getElementById(summaryId);
+        if (!entries.length) {
+          target.innerHTML = `<div class="empty-state">No prompt-theme overlap in this view.</div>`;
+          summary.textContent = "No overlapping comment themes in this slice.";
+          return;
+        }
+
+        const labels = Array.from(new Set(entries.map((entry) => entry.label)));
+        const themes = Array.from(
+          new Set(entries.flatMap((entry) => entry.themes || ["General"])),
+        ).slice(0, 5);
+
+        const matrix = new Map();
+        labels.forEach((label) => {
+          const row = new Map();
+          themes.forEach((theme) => row.set(theme, 0));
+          matrix.set(label, row);
+        });
+
+        entries.forEach((entry) => {
+          entry.themes.forEach((theme) => {
+            if (themes.includes(theme)) {
+              matrix.get(entry.label).set(theme, (matrix.get(entry.label).get(theme) || 0) + 1);
+            }
+          });
+        });
+
+        const max = Math.max(
+          1,
+          ...labels.flatMap((label) => themes.map((theme) => matrix.get(label).get(theme) || 0)),
+        );
+
+        target.style.setProperty("--matrix-cols", String(themes.length));
+        target.innerHTML = `
+          <div class="matrix-row">
+            <span class="matrix-head">Prompt</span>
+            ${themes.map((theme) => `<span class="matrix-head">${escapeHtml(theme)}</span>`).join("")}
+          </div>
+          ${labels
+            .map((label) => `
+              <div class="matrix-row">
+                <span class="matrix-label">${escapeHtml(label)}</span>
+                ${themes
+                  .map((theme) => {
+                    const value = matrix.get(label).get(theme) || 0;
+                    const level = value === 0 ? 0 : Math.min(4, Math.ceil((value / max) * 4));
+                    return `<span class="matrix-cell" data-level="${level}">${value || "–"}</span>`;
+                  })
+                  .join("")}
+              </div>
+            `)
+            .join("")}
+        `;
+
+        summary.textContent = `${labels.length} prompts cross-read against ${themes.length} dominant themes.`;
+      }
+
+      function renderCommentInsights({ entries, themeChartId, themeSummaryId, matrixId, matrixSummaryId, cloudId, cloudSummaryId }) {
+        const themeCounts = themeCountsFrom(
+          entries.map((entry) => ({ ...entry, __themes: entry.themes })),
+          (entry) => entry.__themes || ["General"],
+        );
+
+        makeBarChart(themeChartId, {
+          labels: themeCounts.map(([label]) => label),
+          values: themeCounts.map(([, value]) => value),
+          color: themeCounts.map(([,], index) => [colors.teal, colors.blue, colors.amber, colors.coral, colors.purple][index % 5]),
+          axis: "y",
+          min: 0,
+          max: undefined,
+        });
+
+        document.getElementById(themeSummaryId).textContent = themeCounts.length
+          ? `${themeCounts[0][0]} is the strongest theme in this slice.`
+          : "No theme signal in this slice.";
+
+        renderCommentMatrix(matrixId, entries, matrixSummaryId);
+
+        const terms = extractTopTerms(entries);
+        renderTermCloud(cloudId, terms);
+        document.getElementById(cloudSummaryId).textContent = terms.length
+          ? `Most repeated words across ${entries.length} comments in view.`
+          : "No repeated terms in this slice.";
+      }
+
       function renderCommentBrowser({ targetId, countId, entries, emptyMessage, makeContext }) {
         const target = document.getElementById(targetId);
         const count = document.getElementById(countId);
@@ -1221,12 +1407,6 @@
           ) {
             return false;
           }
-          if (
-            state.guestThemeFilter !== "all" &&
-            !detectGuestThemes(entry).includes(state.guestThemeFilter)
-          ) {
-            return false;
-          }
           return true;
         });
       }
@@ -1242,12 +1422,6 @@
           if (
             state.vendorInterestFilter !== "all" &&
             entry.marketplace_interest !== state.vendorInterestFilter
-          ) {
-            return false;
-          }
-          if (
-            state.vendorThemeFilter !== "all" &&
-            !detectVendorThemes(entry).includes(state.vendorThemeFilter)
           ) {
             return false;
           }
@@ -1323,22 +1497,6 @@
             ],
             onChange: (value) => {
               state.guestCommerceFilter = value;
-              renderDashboard();
-            },
-          },
-          {
-            label: "Narrative theme",
-            value: state.guestThemeFilter,
-            options: [
-              { value: "all", label: "All themes" },
-              { value: "Connectivity", label: "Connectivity" },
-              { value: "Comfort", label: "Comfort" },
-              { value: "Layout", label: "Layout" },
-              { value: "Market", label: "Market" },
-              { value: "Music & art", label: "Music & art" },
-            ],
-            onChange: (value) => {
-              state.guestThemeFilter = value;
               renderDashboard();
             },
           },
@@ -1549,6 +1707,50 @@
           max: undefined,
         });
 
+        renderQuoteCards({
+          targetId: "guest-merch-notes",
+          countId: "guest-merch-notes-count",
+          buttonId: "guest-merch-notes-show-more",
+          entries: guest
+            .filter((entry) => entry.merch_thoughts)
+            .map((entry) => ({
+              label: "Merch thoughts",
+              text: entry.merch_thoughts,
+              themes: detectGuestThemes(entry),
+            })),
+          visible: 6,
+          makeMeta: (entry) => `
+            <span>${escapeHtml(entry.label)}</span>
+            <div class="theme-chip-row">
+              ${entry.themes.slice(0, 2).map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`).join("")}
+            </div>
+          `,
+          emptyMessage: "No merch notes in this slice.",
+          onShowMore: () => {
+            renderQuoteCards({
+              targetId: "guest-merch-notes",
+              countId: "guest-merch-notes-count",
+              buttonId: "guest-merch-notes-show-more",
+              entries: guest
+                .filter((entry) => entry.merch_thoughts)
+                .map((entry) => ({
+                  label: "Merch thoughts",
+                  text: entry.merch_thoughts,
+                  themes: detectGuestThemes(entry),
+                })),
+              visible: guest.filter((entry) => entry.merch_thoughts).length,
+              makeMeta: (entry) => `
+                <span>${escapeHtml(entry.label)}</span>
+                <div class="theme-chip-row">
+                  ${entry.themes.slice(0, 2).map((theme) => `<span class="theme-chip">${escapeHtml(theme)}</span>`).join("")}
+                </div>
+              `,
+              emptyMessage: "No merch notes in this slice.",
+              onShowMore: () => {},
+            });
+          },
+        });
+
         renderFilterButtons("guest-quote-filters", guestQuoteConfig, state.guestQuoteFilter, (id) => {
           state.guestQuoteFilter = id;
           renderGuestQuotes(guest);
@@ -1557,15 +1759,29 @@
       }
 
       function renderGuestQuotes(guest) {
+        if (state.guestSubview !== "narrative") {
+          return;
+        }
+        const entries = getGuestQuotes(guest);
         renderFilterButtons("guest-quote-filters", guestQuoteConfig, state.guestQuoteFilter, (id) => {
           state.guestQuoteFilter = id;
           renderGuestQuotes(guest);
         });
 
+        renderCommentInsights({
+          entries,
+          themeChartId: "guest-comment-theme-chart",
+          themeSummaryId: "guest-comment-theme-summary",
+          matrixId: "guest-comment-matrix",
+          matrixSummaryId: "guest-comment-matrix-summary",
+          cloudId: "guest-comment-cloud",
+          cloudSummaryId: "guest-comment-cloud-summary",
+        });
+
         renderCommentBrowser({
           targetId: "guest-quotes",
           countId: "guest-quote-count",
-          entries: getGuestQuotes(guest),
+          entries,
           emptyMessage: "No guest comments in this filter.",
           makeContext: () => "Guest response",
         });
@@ -1629,23 +1845,6 @@
             ],
             onChange: (value) => {
               state.vendorInterestFilter = value;
-              state.vendorMarketplaceVisible = 12;
-              renderDashboard();
-            },
-          },
-          {
-            label: "Operational theme",
-            value: state.vendorThemeFilter,
-            options: [
-              { value: "all", label: "All themes" },
-              { value: "Connectivity", label: "Connectivity" },
-              { value: "Layout", label: "Layout" },
-              { value: "Facilities", label: "Facilities" },
-              { value: "Vendor mix", label: "Vendor mix" },
-              { value: "Support", label: "Support" },
-            ],
-            onChange: (value) => {
-              state.vendorThemeFilter = value;
               state.vendorMarketplaceVisible = 12;
               renderDashboard();
             },
@@ -1868,10 +2067,24 @@
       }
 
       function renderVendorResponses(vendor) {
+        if (state.vendorSubview !== "narrative") {
+          return;
+        }
+        const entries = getVendorResponses(vendor);
+        renderCommentInsights({
+          entries,
+          themeChartId: "vendor-comment-theme-chart",
+          themeSummaryId: "vendor-comment-theme-summary",
+          matrixId: "vendor-comment-matrix",
+          matrixSummaryId: "vendor-comment-matrix-summary",
+          cloudId: "vendor-comment-cloud",
+          cloudSummaryId: "vendor-comment-cloud-summary",
+        });
+
         renderCommentBrowser({
           targetId: "vendor-responses",
           countId: "vendor-response-count",
-          entries: getVendorResponses(vendor),
+          entries,
           emptyMessage: "No vendor comments in this filter.",
           makeContext: (entry) => `${entry.trading_name} · ${entry.type}`,
         });
