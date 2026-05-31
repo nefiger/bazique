@@ -26,50 +26,49 @@
             <span class="brand-subtitle">Feedback dashboard</span>
           </span>
         </a>
+        <section class="dataset-switcher" role="tablist" aria-label="Dataset views">
+          <button
+            class="dataset-switch-button"
+            type="button"
+            role="tab"
+            id="tab-guest"
+            aria-controls="panel-guest"
+            aria-selected="true"
+            data-tab="guest"
+          >
+            <span class="dataset-switch-kicker">Festival guests</span>
+            <strong>Guest experience</strong>
+          </button>
+          <button
+            class="dataset-switch-button"
+            type="button"
+            role="tab"
+            id="tab-vendor"
+            aria-controls="panel-vendor"
+            aria-selected="false"
+            data-tab="vendor"
+          >
+            <span class="dataset-switch-kicker">Trading partners</span>
+            <strong>Vendor experience</strong>
+          </button>
+          <button
+            class="dataset-switch-button"
+            type="button"
+            role="tab"
+            id="tab-combined"
+            aria-controls="panel-combined"
+            aria-selected="false"
+            data-tab="combined"
+          >
+            <span class="dataset-switch-kicker">Cross-dataset</span>
+            <strong>Combined view</strong>
+          </button>
+        </section>
         <div class="topbar-context" id="topbar-context"></div>
       </div>
     </header>
 
     <main class="page-shell" id="top">
-      <section class="dataset-switcher" role="tablist" aria-label="Dataset views">
-        <button
-          class="dataset-switch-button"
-          type="button"
-          role="tab"
-          id="tab-guest"
-          aria-controls="panel-guest"
-          aria-selected="true"
-          data-tab="guest"
-        >
-          <span class="dataset-switch-kicker">Festival guests</span>
-          <strong>Guest experience</strong>
-        </button>
-        <button
-          class="dataset-switch-button"
-          type="button"
-          role="tab"
-          id="tab-vendor"
-          aria-controls="panel-vendor"
-          aria-selected="false"
-          data-tab="vendor"
-        >
-          <span class="dataset-switch-kicker">Trading partners</span>
-          <strong>Vendor experience</strong>
-        </button>
-        <button
-          class="dataset-switch-button"
-          type="button"
-          role="tab"
-          id="tab-combined"
-          aria-controls="panel-combined"
-          aria-selected="false"
-          data-tab="combined"
-        >
-          <span class="dataset-switch-kicker">Cross-dataset</span>
-          <strong>Combined view</strong>
-        </button>
-      </section>
-
       <section
         class="tab-panel section-block fade-up delay-2"
         id="panel-guest"
@@ -78,12 +77,12 @@
       >
         <section class="control-bar">
           <div class="control-grid" id="guest-controls"></div>
-          <div class="workspace-rail workspace-rail--with-notes">
+          <div class="workspace-rail">
             <div class="subview-tabs" id="guest-subviews" aria-label="Guest subviews"></div>
-            <div class="insights-note insights-note--compact" aria-label="Guest slice observations">
-              <span class="insights-label">Observed</span>
+            <details class="insights-drawer">
+              <summary>Insights</summary>
               <div class="insights-inline" id="guest-insights"></div>
-            </div>
+            </details>
           </div>
         </section>
 

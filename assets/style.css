@@ -77,7 +77,7 @@ select {
   width: min(calc(100% - 32px), var(--max-width));
   margin: 0 auto;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 12px;
   padding: 8px 0;
@@ -86,7 +86,8 @@ select {
 .topbar-context {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
+  justify-self: end;
 }
 
 .brand {
@@ -123,8 +124,8 @@ select {
 .topbar-stat {
   display: grid;
   gap: 2px;
-  padding: 6px 9px;
-  border-radius: 14px;
+  padding: 5px 8px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #f8f5ef;
@@ -146,16 +147,16 @@ select {
 
 .topbar-stat-note {
   color: rgba(246, 245, 242, 0.8);
-  font-size: 0.62rem;
+  font-size: 0.58rem;
 }
 
 .dataset-switcher {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  margin: 0 0 6px;
-  padding: 3px;
-  border-radius: 12px;
+  margin: 0;
+  padding: 2px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
@@ -169,7 +170,7 @@ select {
   color: rgba(246, 245, 242, 0.72);
   cursor: pointer;
   min-width: 0;
-  padding: 6px 10px;
+  padding: 5px 9px;
   text-align: left;
   display: grid;
   gap: 1px;
@@ -177,12 +178,12 @@ select {
 }
 
 .dataset-switch-button strong {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #f8f5ef;
 }
 
 .dataset-switch-kicker {
-  font-size: 0.54rem;
+  font-size: 0.5rem;
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -632,9 +633,9 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 .control-bar {
   display: grid;
   gap: 4px;
-  padding: 6px 8px 7px;
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.8);
+  padding: 5px 7px 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(24, 20, 31, 0.08);
   box-shadow: 0 8px 26px rgba(17, 18, 22, 0.06);
   position: sticky;
@@ -694,7 +695,7 @@ body[data-view="combined"] .control-bar {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding-top: 1px;
   border-top: 1px solid rgba(24, 20, 31, 0.08);
 }
@@ -751,41 +752,47 @@ body[data-view="combined"] .control-bar {
   font-weight: 700;
 }
 
-.workspace-note {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  align-self: center;
-  color: #7b7580;
+.insights-drawer {
+  justify-self: end;
+  min-width: 0;
+}
+
+.insights-drawer summary {
+  list-style: none;
+  cursor: pointer;
+  color: #7d7682;
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  padding: 2px 0;
 }
 
-.insights-note--compact {
-  padding-top: 0;
-  border-top: 0;
-  gap: 5px;
+.insights-drawer summary::-webkit-details-marker {
+  display: none;
 }
 
-.insights-note--compact .insights-label {
-  padding-top: 2px;
-  color: #8a8490;
-  font-size: 0.54rem;
+.insights-drawer[open] {
+  justify-self: stretch;
 }
 
-.insights-note--compact .insights-inline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.insights-drawer[open] summary {
+  margin-bottom: 4px;
 }
 
-.insights-note--compact .insight-inline-item {
-  color: #88828d;
-  font-size: 0.62rem;
-  line-height: 1.22;
+.insights-drawer .insights-inline {
+  display: grid;
+  gap: 3px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(24, 20, 31, 0.04);
+  border: 1px solid rgba(24, 20, 31, 0.08);
+}
+
+.insights-drawer .insight-inline-item {
+  color: #777180;
+  font-size: 0.64rem;
+  line-height: 1.28;
 }
 
 .filter-chip {
@@ -1163,7 +1170,6 @@ body[data-view="combined"] .control-bar {
 }
 
 @media (max-width: 980px) {
-  .topbar-inner,
   .topbar-context,
   .dataset-switcher,
   .control-grid,
@@ -1182,7 +1188,12 @@ body[data-view="combined"] .control-bar {
   }
 
   .topbar-inner {
+    grid-template-columns: 1fr;
     justify-items: start;
+  }
+
+  .topbar-context {
+    width: 100%;
   }
 
   .dataset-switcher {
@@ -1197,6 +1208,10 @@ body[data-view="combined"] .control-bar {
 
   .workspace-rail {
     grid-template-columns: 1fr;
+  }
+
+  .insights-drawer {
+    justify-self: start;
   }
 }
 
