@@ -180,7 +180,7 @@
 
           <article class="chart-card">
             <div class="chart-head">
-              <h3 class="chart-title">Term cloud</h3>
+              <h3 class="chart-title">Repeated phrases</h3>
             </div>
             <p class="chart-caption" id="guest-comment-cloud-summary"></p>
             <div class="term-cloud" id="guest-comment-cloud"></div>
@@ -373,7 +373,7 @@
 
           <article class="chart-card">
             <div class="chart-head">
-              <h3 class="chart-title">Term cloud</h3>
+              <h3 class="chart-title">Repeated phrases</h3>
             </div>
             <p class="chart-caption" id="vendor-comment-cloud-summary"></p>
             <div class="term-cloud" id="vendor-comment-cloud"></div>
@@ -927,28 +927,46 @@
           .sort((a, b) => b.items.length - a.items.length);
       }
 
-      function extractTopTerms(entries, limit = 18) {
+      function extractTopTerms(entries, limit = 12) {
         const stopwords = new Set([
           "the", "and", "for", "that", "with", "this", "from", "have", "they", "them",
           "just", "more", "very", "really", "were", "was", "what", "when", "would", "there",
           "about", "because", "into", "than", "your", "our", "their", "then", "them", "some",
           "still", "been", "being", "also", "only", "over", "under", "while", "where", "which",
           "could", "should", "after", "before", "again", "much", "many", "like", "feel", "felt",
-          "bazique", "festival", "guests", "guest", "vendors", "vendor",
+          "bazique", "festival", "guests", "guest", "vendors", "vendor", "good", "great",
         ]);
 
-        const counts = new Map();
+        const termCounts = new Map();
+        const phraseCounts = new Map();
         entries.forEach((entry) => {
-          entry.text
+          const words = entry.text
             .toLowerCase()
             .replace(/[^a-z0-9\s]/g, " ")
             .split(/\s+/)
-            .filter((word) => word.length >= 4 && !stopwords.has(word))
-            .forEach((word) => counts.set(word, (counts.get(word) || 0) + 1));
+            .filter((word) => word.length >= 3 && !stopwords.has(word));
+
+          words
+            .filter((word) => word.length >= 4)
+            .forEach((word) => termCounts.set(word, (termCounts.get(word) || 0) + 1));
+
+          for (let index = 0; index < words.length - 1; index += 1) {
+            const pair = `${words[index]} ${words[index + 1]}`;
+            if (words[index].length >= 4 || words[index + 1].length >= 4) {
+              phraseCounts.set(pair, (phraseCounts.get(pair) || 0) + 1);
+            }
+          }
         });
 
-        return Array.from(counts.entries())
-          .sort((a, b) => b[1] - a[1])
+        const phrases = Array.from(phraseCounts.entries())
+          .filter(([, count]) => count >= 2)
+          .sort((a, b) => b[1] - a[1]);
+
+        const terms = Array.from(termCounts.entries())
+          .filter(([, count]) => count >= 3)
+          .sort((a, b) => b[1] - a[1]);
+
+        return [...phrases, ...terms]
           .slice(0, limit);
       }
 
@@ -961,9 +979,16 @@
 
         const max = terms[0][1] || 1;
         target.innerHTML = terms
-          .map(([term, count]) => {
-            const size = 0.72 + ((count / max) * 0.42);
-            return `<span class="term-chip" style="font-size:${size.toFixed(2)}rem">${escapeHtml(term)} <strong>${count}</strong></span>`;
+          .map(([term, count], index) => {
+            const width = 40 + ((count / max) * 60);
+            return `
+              <div class="term-row">
+                <span class="term-rank">${index + 1}</span>
+                <span class="term-label">${escapeHtml(term)}</span>
+                <span class="term-bar"><span style="width:${width.toFixed(1)}%"></span></span>
+                <strong class="term-count">${count}</strong>
+              </div>
+            `;
           })
           .join("");
       }
@@ -981,6 +1006,7 @@
         const themes = Array.from(
           new Set(entries.flatMap((entry) => entry.themes || ["General"])),
         ).slice(0, 5);
+        const totalsByLabel = new Map(labels.map((label) => [label, entries.filter((entry) => entry.label === label).length]));
 
         const matrix = new Map();
         labels.forEach((label) => {
@@ -1011,12 +1037,14 @@
           ${labels
             .map((label) => `
               <div class="matrix-row">
-                <span class="matrix-label">${escapeHtml(label)}</span>
+                <span class="matrix-label">${escapeHtml(label)} <small>n=${totalsByLabel.get(label) || 0}</small></span>
                 ${themes
                   .map((theme) => {
                     const value = matrix.get(label).get(theme) || 0;
-                    const level = value === 0 ? 0 : Math.min(4, Math.ceil((value / max) * 4));
-                    return `<span class="matrix-cell" data-level="${level}">${value || "–"}</span>`;
+                    const total = totalsByLabel.get(label) || 1;
+                    const share = Math.round((value / total) * 100);
+                    const level = share === 0 ? 0 : Math.min(4, Math.ceil((share / 100) * 4));
+                    return `<span class="matrix-cell" data-level="${level}" title="${value} of ${total} comments mention ${theme}">${share || "–"}${share ? "%" : ""}</span>`;
                   })
                   .join("")}
               </div>
@@ -1024,7 +1052,7 @@
             .join("")}
         `;
 
-        summary.textContent = `${labels.length} prompts cross-read against ${themes.length} dominant themes.`;
+        summary.textContent = `Rows are comment prompts. Each cell shows the share of comments in that prompt that mention the theme.`;
       }
 
       function renderCommentInsights({ entries, themeChartId, themeSummaryId, matrixId, matrixSummaryId, cloudId, cloudSummaryId }) {
@@ -1051,7 +1079,7 @@
         const terms = extractTopTerms(entries);
         renderTermCloud(cloudId, terms);
         document.getElementById(cloudSummaryId).textContent = terms.length
-          ? `Most repeated words across ${entries.length} comments in view.`
+          ? `Repeated phrases and terms across ${entries.length} comments in view, ranked by frequency.`
           : "No repeated terms in this slice.";
       }
 
