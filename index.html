@@ -1002,14 +1002,9 @@
               note: "average in current slice",
             },
             {
-              label: "Rated 4 or 5",
-              value: guest.length ? fmtPercent((rated45 / guest.length) * 100, 0) : "0%",
-              note: `${rated45} responses`,
-            },
-            {
-              label: "Definite return",
-              value: guest.length ? fmtPercent((returnDefinite / guest.length) * 100, 0) : "0%",
-              note: `${returnDefinite} already planning 2027`,
+              label: "Return profile",
+              value: `${guest.length ? fmtPercent((rated45 / guest.length) * 100, 0) : "0%"} high / ${guest.length ? fmtPercent((returnDefinite / guest.length) * 100, 0) : "0%"} definite`,
+              note: `${rated45} rated 4-5, ${returnDefinite} already planning 2027`,
             },
           ];
         } else if (state.activeTab === "vendor") {
@@ -1033,9 +1028,9 @@
               note: "foot traffic / placement",
             },
             {
-              label: "Definite return",
-              value: `${definite}`,
-              note: "vendors already back for 2027",
+              label: "Return profile",
+              value: `${definite} definite`,
+              note: `${vendor.length - definite} depend on detail or unlikely`,
             },
           ];
         } else {
@@ -1056,13 +1051,8 @@
             },
             {
               label: "Guest demand",
-              value: guest.length ? fmtPercent((missed / guest.length) * 100, 0) : "0%",
-              note: "missed a purchase",
-            },
-            {
-              label: "Browse appetite",
-              value: guest.length ? fmtPercent((positiveBrowse / guest.length) * 100, 0) : "0%",
-              note: "positive pre-browse signal",
+              value: `${guest.length ? fmtPercent((missed / guest.length) * 100, 0) : "0%"} missed`,
+              note: `${guest.length ? fmtPercent((positiveBrowse / guest.length) * 100, 0) : "0%"} positive browse appetite`,
             },
             {
               label: "Vendor supply",

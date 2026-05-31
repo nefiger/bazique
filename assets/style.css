@@ -38,10 +38,10 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 8%, rgba(216, 90, 48, 0.28), transparent 22%),
-    radial-gradient(circle at 82% 10%, rgba(29, 158, 117, 0.26), transparent 24%),
-    radial-gradient(circle at 50% 0%, rgba(127, 119, 221, 0.22), transparent 28%),
-    linear-gradient(180deg, #0d1017 0%, #181126 15%, #241131 24%, #f6f4f0 24.1%, #f3f2ee 100%);
+    radial-gradient(circle at 12% 6%, rgba(216, 90, 48, 0.18), transparent 18%),
+    radial-gradient(circle at 82% 8%, rgba(29, 158, 117, 0.16), transparent 18%),
+    radial-gradient(circle at 50% 0%, rgba(127, 119, 221, 0.12), transparent 20%),
+    linear-gradient(180deg, #0d1017 0%, #17131f 102px, #ebe7de 102px, #f3f0e8 100%);
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   line-height: 1.55;
@@ -60,7 +60,7 @@ select {
 .page-shell {
   width: min(calc(100% - 32px), var(--max-width));
   margin: 0 auto;
-  padding: 18px 0 var(--space-2xl);
+  padding: 14px 0 var(--space-2xl);
 }
 
 .topbar {
@@ -85,7 +85,7 @@ select {
 
 .topbar-context {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   justify-self: end;
 }
@@ -212,10 +212,10 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 .callout-card,
 .signal-card,
 .readme-note {
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(29, 158, 117, 0.12);
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(24, 20, 31, 0.08);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .hero-tags,
@@ -277,6 +277,16 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   margin-top: 8px;
 }
 
+.tab-panel {
+  padding: 12px 14px 18px;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(251, 248, 242, 0.94), rgba(247, 243, 235, 0.96)),
+    rgba(251, 248, 242, 0.96);
+  border: 1px solid rgba(24, 20, 31, 0.07);
+  box-shadow: 0 20px 40px rgba(17, 18, 22, 0.08);
+}
+
 .section-head {
   display: grid;
   gap: var(--space-xs);
@@ -300,16 +310,6 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
   font-size: 0.78rem;
 }
 
-.tab-panel > .section-head h2,
-.tab-panel > .section-head h3,
-.story-head h3 {
-  color: #f3efe8;
-}
-
-.tab-panel > .section-head p,
-.story-head p {
-  color: rgba(243, 239, 232, 0.68);
-}
 
 .mini-metrics-grid,
 .metric-ribbon {
@@ -633,31 +633,19 @@ body[data-view="combined"] .dataset-switch-button[data-tab="combined"][aria-sele
 .control-bar {
   display: grid;
   gap: 4px;
-  padding: 5px 7px 6px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(24, 20, 31, 0.08);
-  box-shadow: 0 8px 26px rgba(17, 18, 22, 0.06);
+  padding: 0 0 8px;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
   position: sticky;
   top: 78px;
   z-index: 20;
 }
 
-body[data-view="guest"] .control-bar {
-  border-top: 3px solid rgba(29, 158, 117, 0.34);
-}
-
-body[data-view="vendor"] .control-bar {
-  border-top: 3px solid rgba(239, 159, 39, 0.34);
-}
-
-body[data-view="combined"] .control-bar {
-  border-top: 3px solid rgba(127, 119, 221, 0.34);
-}
-
 .control-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 5px;
 }
 
@@ -696,8 +684,7 @@ body[data-view="combined"] .control-bar {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 6px;
-  padding-top: 1px;
-  border-top: 1px solid rgba(24, 20, 31, 0.08);
+  padding-top: 6px;
 }
 
 .workspace-rail--single {
@@ -724,27 +711,28 @@ body[data-view="combined"] .control-bar {
   display: inline-flex;
   align-items: center;
   gap: 0;
-  padding: 2px;
-  border-radius: 8px;
-  background: rgba(24, 20, 31, 0.04);
-  border: 1px solid rgba(24, 20, 31, 0.08);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
 }
 
 .subview-chip {
   appearance: none;
-  border: 0;
+  border: 1px solid transparent;
   background: transparent;
   color: #645e69;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px 10px;
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .subview-chip[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.86);
   color: #17141d;
-  box-shadow: 0 2px 8px rgba(17, 18, 22, 0.06);
+  border-color: rgba(24, 20, 31, 0.08);
+  box-shadow: none;
 }
 
 .subview-chip-label {
@@ -785,8 +773,8 @@ body[data-view="combined"] .control-bar {
   gap: 3px;
   padding: 6px 8px;
   border-radius: 10px;
-  background: rgba(24, 20, 31, 0.04);
-  border: 1px solid rgba(24, 20, 31, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(24, 20, 31, 0.07);
 }
 
 .insights-drawer .insight-inline-item {
@@ -881,6 +869,13 @@ body[data-view="combined"] .control-bar {
 .story-group {
   display: grid;
   gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(24, 20, 31, 0.06);
+}
+
+.story-group:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 
 .story-head {
@@ -896,6 +891,7 @@ body[data-view="combined"] .control-bar {
 
 .story-head p {
   margin: 0;
+  color: #746d79;
   font-size: 0.72rem;
 }
 
@@ -922,11 +918,9 @@ body[data-view="combined"] .control-bar {
   gap: 5px;
   padding: 8px 10px;
   border-radius: var(--radius-md);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 245, 240, 0.96)),
-    rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(24, 20, 31, 0.06);
-  box-shadow: 0 12px 34px rgba(17, 18, 22, 0.08);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(24, 20, 31, 0.07);
+  box-shadow: none;
 }
 
 .comment-group-head {
@@ -1034,13 +1028,11 @@ body[data-view="combined"] .control-bar {
 .subsection-card {
   display: grid;
   gap: 12px;
-  padding: 8px 10px;
+  padding: 0;
   border-radius: var(--radius-md);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 247, 243, 0.96)),
-    rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(24, 20, 31, 0.06);
-  box-shadow: 0 12px 34px rgba(17, 18, 22, 0.08);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .subsection-head {
